@@ -3,11 +3,11 @@ import React, { useState } from "react";
 
 import { Player } from "types/Player";
 
-interface Props {
-  onAddPlayers: (players: Player[]) => void;
-}
+// interface Props {
+//   onAddPlayers: (players: Player[]) => void;
+// }
 
-const AddPlayersScreen: React.FC<Props> = ({ onAddPlayers }) => {
+const AddPlayersScreen = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [name, setName] = useState("");
   const [skillLevel, setSkillLevel] = useState<"A" | "B">("A");
@@ -22,7 +22,7 @@ const AddPlayersScreen: React.FC<Props> = ({ onAddPlayers }) => {
   };
 
   const handleStartTournament = () => {
-    onAddPlayers(players);
+    console.log('player added');
   };
 
   return (
