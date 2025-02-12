@@ -1,3 +1,5 @@
+import './App.css';
+
 import AppRoutes from 'Routes';
 import { BrowserRouter } from 'react-router-dom';
 import React from 'react';

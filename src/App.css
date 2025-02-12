@@ -1,0 +1,15 @@
+* {
+    margin: 0; /* Reset margin for all elements */
+    padding: 0; /* Reset padding for all elements */
+    box-sizing: border-box; /* Ensure consistent box sizing */
+  }
+  
+  body {
+    height: 100vh; /* Full height of the viewport */
+    background: linear-gradient(to right, #ff7e5f, #feb47b); /* Same gradient background */
+  }
+  
+  /* Optional: If you want to define the font family globally */
+  body {
+    font-family: Arial, sans-serif;
+  }
