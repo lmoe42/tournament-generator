@@ -1,5 +1,5 @@
 export enum TournamentTypes {
-    STRONGMAN = 'strongman',
+    STRONGMAN = 'Strongman',
 }
 
 export type Tournament = { 

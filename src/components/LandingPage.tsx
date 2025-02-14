@@ -2,64 +2,65 @@ import { Button, ButtonGroup, Container, MenuItem, Modal, TextField, Typography 
 import React, { useState } from 'react';
 
 import BoltIcon from '@mui/icons-material/Bolt';
+import { Theme } from '@mui/material/styles';
 import { TournamentTypes } from '../types';
 import { makeStyles } from '@mui/styles';
 import { useNavigate } from 'react-router-dom';
 
-const useStyles = makeStyles({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    width: '100vw',
-    textAlign: 'center',
-    background: 'linear-gradient(to right,rgb(212, 152, 137), #feb47b)', // Example gradient background
-    color: '#401d1b', // Set text color to white for better contrast
-  },
-  welcomeText: {
-    fontFamily: 'Cursive, Arial, sans-serif', // Example cursive font
-    fontSize: '2.5rem',
-    fontWeight: 'bold',
-  },
-  subtitleText: {
-    fontSize: '1.2rem',
-  },
-  buttonGroup: {
-    marginTop: '2.5rem',
-    '& .MuiButton-root': {
-      backgroundColor: '#ff6f20', // Set your desired hex color here
-      color: '#fff', // Ensuring the text color is white
-      padding: '20px 40px', // Customize button size here
-      '&:hover': {
-        backgroundColor: '#e65c1e', // Optional: Customize hover effect color
-      },
+const useStyles = makeStyles((theme: Theme) => ({
+    root: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        width: '100vw',
+        textAlign: 'center',
+        background: `linear-gradient(to right, ${theme.palette.primary.light}, #fcdcd6)`, // Example gradient background
+        color: '#401d1b', // Set text color to white for better contrast
     },
-  },
-  iconSeparator: {
-    display: 'flex',
-    alignItems: 'center',
-    color: '#fff', // Set icon color to match button text color
-    fontSize: '36px', // Set custom size for the icon
-    width: '6px',
-    height: '48px', // Set a fixed width for spacing
-    justifyContent: 'center',
-    zIndex: 1,
-  },
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paper: {
-    backgroundColor: 'white',
-    padding: '24px',
-    borderRadius: '8px',
-    boxShadow: '0 3px 5px rgba(0,0,0,0.2)',
-    minWidth: '300px',
-  },
-});
+    welcomeText: {
+        fontFamily: 'Cursive, Arial, sans-serif', // Example cursive font
+        fontSize: '2.5rem',
+        fontWeight: 'bold',
+    },
+    subtitleText: {
+        fontSize: '1.2rem',
+    },
+    buttonGroup: {
+        marginTop: '2.5rem',
+        '& .MuiButton-root': {
+            backgroundColor: theme.palette.primary.main, // Set your desired hex color here
+            color: '#fff', // Ensuring the text color is white
+            padding: '20px 40px', // Customize button size here
+            '&:hover': {
+                backgroundColor: theme.palette.primary.dark, // Optional: Customize hover effect color
+            },
+        },
+    },
+    iconSeparator: {
+        display: 'flex',
+        alignItems: 'center',
+        color: '#fff', // Set icon color to match button text color
+        fontSize: '36px', // Set custom size for the icon
+        width: '6px',
+        height: '48px', // Set a fixed width for spacing
+        justifyContent: 'center',
+        zIndex: 1,
+    },
+    modal: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    paper: {
+        backgroundColor: 'white',
+        padding: '24px',
+        borderRadius: '8px',
+        boxShadow: '0 3px 5px rgba(0,0,0,0.2)',
+        minWidth: '300px',
+    },
+}));
 
 const LandingPage: React.FC = () => {
   const classes = useStyles();
@@ -74,6 +75,7 @@ const LandingPage: React.FC = () => {
 
   const handleCreateTournament = () => {
     // On confirming creation, you can route to the new tournament component
+    alert(`Your Tournament has been created`);
     navigate(`/tournament/${tournamentName}`); // Adjust the route as needed
     handleCloseModal(); // Close the modal
   };
@@ -124,9 +126,9 @@ const LandingPage: React.FC = () => {
             fullWidth
             margin="normal"
           >
-            {Object.keys(TournamentTypes).map((type) => (
+            {Object.values(TournamentTypes).map((type) => (
               <MenuItem key={type} value={type}>
-                {type.charAt(0).toUpperCase() + type.slice(1)} {/* Capitalize the first letter */}
+                {type}
               </MenuItem>
             ))}
           </TextField>
