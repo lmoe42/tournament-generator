@@ -73,15 +73,43 @@ const LandingPage: React.FC = () => {
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
 
+  const validateTournamentName = (name: string) => {
+    const errors: string[] = [];
+    if (!name.trim()) {
+      errors.push('Tournament name cannot be empty.');
+    }
+    if (errors.length) {
+      alert(errors.join('\n'));
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   const handleCreateTournament = () => {
-    // On confirming creation, you can route to the new tournament component
-    alert(`Your Tournament has been created`);
-    navigate(`/tournament/${tournamentName}`); // Adjust the route as needed
-    handleCloseModal(); // Close the modal
+    if (!validateTournamentName(tournamentName)) {
+      return;
+    }
+
+    const newTournament = {
+      name: tournamentName,
+      participants: [],
+      type: selectedType,
+    };
+
+    const existingTournaments = JSON.parse(localStorage.getItem('existingTournaments') || '[]');
+
+    existingTournaments.push(newTournament);
+
+    localStorage.setItem('existingTournaments', JSON.stringify(existingTournaments));
+
+    navigate(`/tournament/${tournamentName}`);
+    handleCloseModal();
   };
+
   const handleExistingTournament = () => {
     // Logic for navigating to an existing tournament will go here
-    console.log('Navigating to existing tournament...');
+    alert('Navigating to existing tournament...');
   };
 
   const handleNewTournament = () => {
