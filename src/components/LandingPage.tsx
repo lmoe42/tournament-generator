@@ -108,8 +108,7 @@ const LandingPage: React.FC = () => {
   };
 
   const handleExistingTournament = () => {
-    // Logic for navigating to an existing tournament will go here
-    alert('Navigating to existing tournament...');
+    navigate('/tournaments');
   };
 
   const handleNewTournament = () => {
@@ -125,7 +124,7 @@ const LandingPage: React.FC = () => {
         Choose an option to get started
       </Typography>
       <ButtonGroup variant="contained" className={classes.buttonGroup}>
-        <Button onClick={handleExistingTournament}>Existing Tournament</Button>
+        <Button onClick={handleExistingTournament}>Existing Tournaments</Button>
         <span className={classes.iconSeparator}>
           <BoltIcon style={{ fontSize: '136px' }} />
         </span>
