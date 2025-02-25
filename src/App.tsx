@@ -3,6 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import AppRoutes from 'Routes';
 import { BrowserRouter } from 'react-router-dom';
 import { GlobalStyles } from '@mui/material';
+import Header from 'components/Header';
 import React from 'react';
 
 const theme = createTheme({
@@ -20,6 +21,11 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
        <GlobalStyles styles={{ 
+        '*': {
+          margin: 0,
+          padding: 0,
+          boxSizing: 'border-box',
+        },
         body: {
           margin: 0,
           background: `linear-gradient(to right, ${theme.palette.primary.light}, #fcdcd6)`,
@@ -29,7 +35,10 @@ function App() {
         },
       }} />
       <BrowserRouter>
-        <AppRoutes />
+        <Header />
+        <div style={{ paddingTop: '64px' }}> {/* Space for the fixed header */}
+          <AppRoutes />
+        </div>
       </BrowserRouter>
     </ThemeProvider>
   );

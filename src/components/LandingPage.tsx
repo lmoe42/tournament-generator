@@ -1,9 +1,9 @@
-import { Button, ButtonGroup, Container, MenuItem, Modal, TextField, Typography } from '@mui/material';
+import { Button, ButtonGroup, Container, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
 import BoltIcon from '@mui/icons-material/Bolt';
 import { Theme } from '@mui/material/styles';
-import { TournamentTypes } from '../types';
+import TournamentCreationModal from './TournamentCreationModal';
 import { makeStyles } from '@mui/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -66,48 +66,12 @@ const LandingPage: React.FC = () => {
   const classes = useStyles();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [tournamentName, setTournamentName] = useState('');
-  const [selectedType, setSelectedType] = useState(TournamentTypes.STRONGMAN);
   const navigate = useNavigate();
 
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
 
-  const validateTournamentName = (name: string) => {
-    const errors: string[] = [];
-    if (!name.trim()) {
-      errors.push('Tournament name cannot be empty.');
-    }
-    if (errors.length) {
-      alert(errors.join('\n'));
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  const handleCreateTournament = () => {
-    if (!validateTournamentName(tournamentName)) {
-      return;
-    }
-
-    const newTournament = {
-      name: tournamentName,
-      participants: [],
-      type: selectedType,
-    };
-
-    const existingTournaments = JSON.parse(localStorage.getItem('existingTournaments') || '[]');
-
-    existingTournaments.push(newTournament);
-
-    localStorage.setItem('existingTournaments', JSON.stringify(existingTournaments));
-
-    navigate(`/tournament/${tournamentName}`);
-    handleCloseModal();
-  };
-
-  const handleExistingTournament = () => {
+  const handleExistingTournaments = () => {
     navigate('/tournaments');
   };
 
@@ -124,51 +88,18 @@ const LandingPage: React.FC = () => {
         Choose an option to get started
       </Typography>
       <ButtonGroup variant="contained" className={classes.buttonGroup}>
-        <Button onClick={handleExistingTournament}>Existing Tournaments</Button>
+        <Button onClick={handleExistingTournaments}>Existing Tournaments</Button>
         <span className={classes.iconSeparator}>
           <BoltIcon style={{ fontSize: '136px' }} />
         </span>
         <Button onClick={handleNewTournament}>New Tournament</Button>
       </ButtonGroup>
 
-      <Modal
+      <TournamentCreationModal
         open={modalOpen}
-        onClose={handleCloseModal}
-        className={classes.modal}
-      >
-        <div className={classes.paper}>
-          <Typography variant="h6">Create New Tournament</Typography>
-          <TextField
-            label="Tournament Name"
-            value={tournamentName}
-            onChange={(e) => setTournamentName(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            select
-            label="Tournament Type"
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value as TournamentTypes)}
-            fullWidth
-            margin="normal"
-          >
-            {Object.values(TournamentTypes).map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </TextField>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCreateTournament}
-            fullWidth
-          >
-            Create Tournament
-          </Button>
-        </div>
-      </Modal>
+        onClose={handleCloseModal}>
+      </TournamentCreationModal>
+      
     </Container>
   );
 };
