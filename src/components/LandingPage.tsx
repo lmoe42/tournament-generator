@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import BoltIcon from '@mui/icons-material/Bolt';
 import { Theme } from '@mui/material/styles';
 import TournamentCreationModal from './TournamentCreationModal';
+import TrophySvg from '../assets/trophy.svg';
 import { makeStyles } from '@mui/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,6 +37,7 @@ const useStyles = makeStyles((theme: Theme) => ({
             '&:hover': {
                 backgroundColor: theme.palette.primary.dark, // Optional: Customize hover effect color
             },
+            width: '300px',
         },
     },
     iconSeparator: {
@@ -81,12 +83,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <Container className={classes.root} maxWidth={false}>
-      <Typography variant="h1" className={classes.welcomeText} gutterBottom>
-        Tournament Generator
-      </Typography>
-      <Typography variant="h4" className={classes.subtitleText} gutterBottom>
-        Choose an option to get started
-      </Typography>
+      <img src={TrophySvg} alt="Welcome" style={{ width: '300px', height: 'auto' }} />
       <ButtonGroup variant="contained" className={classes.buttonGroup}>
         <Button onClick={handleExistingTournaments}>Existing Tournaments</Button>
         <span className={classes.iconSeparator}>
