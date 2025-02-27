@@ -87,7 +87,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
 
       {/* Action Buttons */}
       <div style={{ marginTop: '20px' }}>
-        <Button variant="contained" color="secondary" startIcon={<PersonIcon />} style={{ marginRight: '10px' }}>
+        <Button variant="contained" color="primary" startIcon={<PersonIcon />} style={{ marginRight: '10px' }}>
           Manage Participants
         </Button>
         <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />}>
