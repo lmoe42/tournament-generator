@@ -6,6 +6,7 @@ export type Tournament = {
     name: string;
     participants: string[];
     type: TournamentTypes;
+    events?: StrongmanEvent[];
 }
 
 export enum StrongmanEventTypes {
@@ -18,8 +19,6 @@ export enum StrongmanEventTypes {
 export type StrongmanEvent = {
     name: string;
     type: StrongmanEventTypes;
-}
-
-export type StrongmanTournament = Event & {
-    events: StrongmanEvent[];
+    results?: string[];
+    places: number[];
 }
