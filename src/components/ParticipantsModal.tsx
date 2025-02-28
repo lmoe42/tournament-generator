@@ -15,33 +15,25 @@ import React, { useState } from 'react';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Tournament } from '../types';
+import { saveTournament } from '../logic/persistance';
 
 interface ParticipantsModalProps {
   open: boolean;
   onClose: () => void;
-  onUpdate: (participants: string[]) => void;
+  onUpdate: (participants: string) => void;
   tournament: Tournament;
 }
 
-const ParticipantsModal: React.FC<ParticipantsModalProps> = ({ open, onClose, tournament }) => {
+const ParticipantsModal: React.FC<ParticipantsModalProps> = ({ open, onClose, onUpdate, tournament }) => {
   const { participants } = tournament;
   const [newParticipants, setNewParticipants] = useState('');
+  const [currentParticipants, setCurrentParticipants] = useState(participants);
 
   const handleDeleteParticipant = (participantToDelete: string) => {
-
     const updatedParticipants = participants.filter(participant => participant !== participantToDelete);
-    // Here, you should update the state of the tournament in the parent component that holds this modal
-  };
-
-  const handleAddParticipants = () => {
-    if (newParticipants.trim()) {
-      // Split names by comma and trim whitespace from each name
-      const additionalParticipants = newParticipants.split(',')
-        .map(participant => participant.trim())
-        .filter(participant => participant); // Filter out any empty strings
-      // Here, you should concatenate the participants with the previous state and call an update function in the parent component
-      setNewParticipants(''); // Clear the input field after adding
-    }
+    tournament.participants = updatedParticipants;
+    setCurrentParticipants(updatedParticipants);
+    saveTournament(tournament);
   };
 
   return (
@@ -55,7 +47,7 @@ const ParticipantsModal: React.FC<ParticipantsModalProps> = ({ open, onClose, to
               <ListItemText primary="No participants yet." />
             </ListItem>
           ) : (
-            participants.map((participant, index) => (
+            currentParticipants.map((participant, index) => (
               <ListItem key={index} secondaryAction={
                 <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteParticipant(participant)}>
                   <DeleteIcon color="error" />
@@ -77,7 +69,7 @@ const ParticipantsModal: React.FC<ParticipantsModalProps> = ({ open, onClose, to
           />
         </Tooltip>
         
-        <Button variant="contained" color="primary" onClick={handleAddParticipants} style={{ marginTop: '10px' }}>
+        <Button variant="contained" color="primary" onClick={() => onUpdate(newParticipants)} style={{ marginTop: '10px' }}>
           Add
         </Button>
       </div>

@@ -16,7 +16,8 @@ import React, { useState } from 'react';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ParticipantsModal from './ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
-import { Tournament } from '../types'; // Ensure you import your types
+import { Tournament } from '../types';
+import { saveTournament } from 'logic/persistance';
 
 interface TournamentStrongmanProps {
   tournament: Tournament; // Received tournament object
@@ -37,10 +38,8 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
     participants.forEach(participant => {
      tournament.participants.push(participant)
     })
-    const existingTournmanets = localStorage.getItem('existingTournaments')
-    existingTournmanets.find((tournament) =>
-      // Add participant to the tournamen
-    setParticipantsModalOpen(false);
+    saveTournament(tournament);
+    handleCloseParticipantsModal();
   };
 
   return (
