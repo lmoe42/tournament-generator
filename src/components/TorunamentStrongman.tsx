@@ -11,11 +11,13 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import React, { useState } from 'react';
 
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import ParticipantsModal from './ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
-import React from 'react';
-import { Tournament } from '../types'; // Ensure you import your types
+import { Tournament } from '../types';
+import { saveTournament } from 'logic/persistance';
 
 interface TournamentStrongmanProps {
   tournament: Tournament; // Received tournament object
@@ -25,13 +27,27 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
   const { name, participants } = tournament; // Destructure tournament
   const events = tournament.events ?? []; // Destructure events with default value
 
+  const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
+
+  const handleOpenParticipantsModal = () => setParticipantsModalOpen(true);
+  const handleCloseParticipantsModal = () => setParticipantsModalOpen(false);
+
+  // Handle participant updates here (to be implemented properly)
+  const updateParticipants = (newParticipants: string) => {
+    const participants = newParticipants.split(',')
+    participants.forEach(participant => {
+     tournament.participants.push(participant)
+    })
+    saveTournament(tournament);
+    handleCloseParticipantsModal();
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <Typography variant="h4" gutterBottom>
         {name}
       </Typography>
 
-      {/* Table for Events and Participants */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -85,15 +101,21 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         </Table>
       </TableContainer>
 
-      {/* Action Buttons */}
       <div style={{ marginTop: '20px' }}>
-        <Button variant="contained" color="primary" startIcon={<PersonIcon />} style={{ marginRight: '10px' }}>
+        <Button variant="contained" color="primary" startIcon={<PersonIcon />} style={{ marginRight: '10px' }} onClick={handleOpenParticipantsModal}>
           Manage Participants
         </Button>
         <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />}>
           Manage Events
         </Button>
       </div>
+
+      <ParticipantsModal 
+        open={participantsModalOpen} 
+        onClose={handleCloseParticipantsModal}
+        onUpdate={updateParticipants}
+        tournament={tournament} // Pass tournament object to modal
+      />
     </div>
   );
 };
