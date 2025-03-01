@@ -70,7 +70,7 @@ const ParticipantsModal: React.FC<ParticipantsModalProps> = ({ open, onClose, on
         </Tooltip>
         
         <Button variant="contained" color="primary" onClick={() => onUpdate(newParticipants)} style={{ marginTop: '10px' }}>
-          Add
+          Confirm
         </Button>
       </div>
     </Modal>
