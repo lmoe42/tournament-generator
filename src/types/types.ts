@@ -19,6 +19,4 @@ export enum StrongmanEventTypes {
 export type StrongmanEvent = {
     name: string;
     type: StrongmanEventTypes;
-    results?: string[];
-    places: number[];
 }

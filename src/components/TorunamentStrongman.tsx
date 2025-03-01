@@ -12,27 +12,31 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
+import { StrongmanEvent, Tournament } from '../types';
 
+import EventsModal from './EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ParticipantsModal from './ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
-import { Tournament } from '../types';
 import { saveTournament } from 'logic/persistance';
 
 interface TournamentStrongmanProps {
-  tournament: Tournament; // Received tournament object
+  tournament: Tournament;
 }
 
 const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament }) => {
-  const { name, participants } = tournament; // Destructure tournament
-  const events = tournament.events ?? []; // Destructure events with default value
+  const { name, participants } = tournament;
+  const events = tournament.events ?? [];
 
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
-
+  const [eventsModalOpen, setEventsModalOpen] = useState(false);
+  
   const handleOpenParticipantsModal = () => setParticipantsModalOpen(true);
   const handleCloseParticipantsModal = () => setParticipantsModalOpen(false);
+  const handleOpenEventsModal = () => setEventsModalOpen(true);
+  const handleCloseEventsModal = () => setEventsModalOpen(false);
 
-  // Handle participant updates here (to be implemented properly)
+
   const updateParticipants = (newParticipants: string) => {
     const participants = newParticipants.split(',')
     participants.forEach(participant => {
@@ -40,6 +44,11 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
     })
     saveTournament(tournament);
     handleCloseParticipantsModal();
+  };
+
+  const updateEvents = (updatedEvents: StrongmanEvent[]) => {
+    tournament.events = updatedEvents; 
+    saveTournament(tournament);
   };
 
   return (
@@ -56,7 +65,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
               {events.length > 0 ? (
                 events.map((event, index) => (
                   <TableCell key={index} colSpan={2}>
-                    {event.name} {/* Assuming event has a name property */}
+                    {event.name}
                   </TableCell>
                 ))
               ) : (
@@ -68,7 +77,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
               {events.map((_, index) => (
                 <React.Fragment key={index}>
                   <TableCell>Result</TableCell>
-                  <TableCell>Place</TableCell>
+                  <TableCell>Points</TableCell>
                 </React.Fragment>
               ))}
             </TableRow>
@@ -90,8 +99,8 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
                   <TableCell>{participant}</TableCell>
                   {events.map((event, eventIndex) => (
                     <React.Fragment key={eventIndex}>
-                      <TableCell>{event.results ?? 'N/A'}</TableCell>
-                      <TableCell>{event.places?.[participantIndex] || 'N/A'}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
                     </React.Fragment>
                   ))}
                 </TableRow>
@@ -105,7 +114,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         <Button variant="contained" color="primary" startIcon={<PersonIcon />} style={{ marginRight: '10px' }} onClick={handleOpenParticipantsModal}>
           Manage Participants
         </Button>
-        <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />}>
+        <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />} onClick={handleOpenEventsModal}>
           Manage Events
         </Button>
       </div>
@@ -114,7 +123,14 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         open={participantsModalOpen} 
         onClose={handleCloseParticipantsModal}
         onUpdate={updateParticipants}
-        tournament={tournament} // Pass tournament object to modal
+        tournament={tournament}
+      />
+
+      <EventsModal 
+        open={eventsModalOpen}
+        onClose={handleCloseEventsModal}
+        onUpdate={updateEvents}
+        tournament={tournament}
       />
     </div>
   );
