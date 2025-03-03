@@ -1,6 +1,7 @@
 // src/components/TournamentStrongman.tsx
 
 import {
+  Box,
   Button,
   Paper,
   Table,
@@ -30,60 +31,76 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
 
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
   const [eventsModalOpen, setEventsModalOpen] = useState(false);
-  
+
   const handleOpenParticipantsModal = () => setParticipantsModalOpen(true);
   const handleCloseParticipantsModal = () => setParticipantsModalOpen(false);
   const handleOpenEventsModal = () => setEventsModalOpen(true);
   const handleCloseEventsModal = () => setEventsModalOpen(false);
 
-
   const updateParticipants = (newParticipants: string) => {
-    const participants = newParticipants.split(',')
-    participants.forEach(participant => {
-     tournament.participants.push(participant)
-    })
+    const participants = newParticipants.split(',');
+    participants.forEach((participant) => {
+      tournament.participants.push(participant);
+    });
     saveTournament(tournament);
     handleCloseParticipantsModal();
   };
 
   const updateEvents = (updatedEvents: StrongmanEvent[]) => {
-    tournament.events = updatedEvents; 
+    tournament.events = updatedEvents;
     saveTournament(tournament);
   };
 
   return (
     <div style={{ padding: '20px' }}>
-      <Typography variant="h4" gutterBottom>
-        {name}
-      </Typography>
+      <Box
+        sx={{
+          backgroundColor: (theme) => theme.palette.primary.dark,
+          color: 'white',
+          padding: '16px',
+          textAlign: 'center',
+          width: '50%',
+          margin: '0 auto',
+          borderRadius: 5,
+          marginBottom: 2,
+          boxShadow: 3,
+        }}
+      >
+        <Typography variant="h4">{name}</Typography>
+      </Box>
 
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Participants</TableCell>
+              <TableCell rowSpan={2} style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
+                Participants
+              </TableCell>
               {events.length > 0 ? (
                 events.map((event, index) => (
-                  <TableCell key={index} colSpan={2}>
+                  <TableCell key={index} colSpan={2} style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
                     {event.name}
                   </TableCell>
                 ))
               ) : (
                 <TableCell colSpan={2}>No Events yet</TableCell>
               )}
+              <TableCell colSpan={2}>Overall</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell></TableCell>
               {events.map((_, index) => (
                 <React.Fragment key={index}>
-                  <TableCell>Result</TableCell>
-                  <TableCell>Points</TableCell>
+                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Result</TableCell>
+                  <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>Points</TableCell>
                 </React.Fragment>
               ))}
+              {/* Overall Subcolumns */}
+              <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Points</TableCell>
+              <TableCell>Place</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {(participants.length === 0 && events.length === 0) ? (
+            {participants.length === 0 && events.length === 0 ? (
               <TableRow>
                 <TableCell>TBD</TableCell>
                 {events.map((_, index) => (
@@ -92,17 +109,22 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
                     <TableCell>TBD</TableCell>
                   </React.Fragment>
                 ))}
+                <TableCell>TBD</TableCell>
+                <TableCell>TBD</TableCell>
               </TableRow>
             ) : (
               participants.map((participant, participantIndex) => (
                 <TableRow key={participantIndex}>
-                  <TableCell>{participant}</TableCell>
+                  <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>{participant}</TableCell>
                   {events.map((event, eventIndex) => (
                     <React.Fragment key={eventIndex}>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
+                      <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}></TableCell>
+                      <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}></TableCell>
                     </React.Fragment>
                   ))}
+                  {/* Overall Placeholders */}
+                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}></TableCell>
+                  <TableCell></TableCell>
                 </TableRow>
               ))
             )}
@@ -111,7 +133,13 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
       </TableContainer>
 
       <div style={{ marginTop: '20px' }}>
-        <Button variant="contained" color="primary" startIcon={<PersonIcon />} style={{ marginRight: '10px' }} onClick={handleOpenParticipantsModal}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<PersonIcon />}
+          style={{ marginRight: '10px' }}
+          onClick={handleOpenParticipantsModal}
+        >
           Manage Participants
         </Button>
         <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />} onClick={handleOpenEventsModal}>
@@ -119,14 +147,14 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         </Button>
       </div>
 
-      <ParticipantsModal 
-        open={participantsModalOpen} 
+      <ParticipantsModal
+        open={participantsModalOpen}
         onClose={handleCloseParticipantsModal}
         onUpdate={updateParticipants}
         tournament={tournament}
       />
 
-      <EventsModal 
+      <EventsModal
         open={eventsModalOpen}
         onClose={handleCloseEventsModal}
         onUpdate={updateEvents}
