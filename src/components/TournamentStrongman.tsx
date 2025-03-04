@@ -19,13 +19,31 @@ import EventsModal from './EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ParticipantsModal from './ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
+import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import { saveTournament } from 'logic/persistance';
+
+const useStyles = makeStyles((theme: Theme) => ({
+  headerBox: {
+    backgroundColor: theme.palette.primary.dark,
+    color: 'white',
+    padding: '16px',
+    textAlign: 'center',
+    width: '50%',
+    margin: '0 auto',
+    borderRadius: 20,
+    marginBottom: 20,
+    boxShadow: '3px 3px 5px rgba(0, 0, 0, 0.3)',
+  },
+}));
 
 interface TournamentStrongmanProps {
   tournament: Tournament;
 }
 
 const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament }) => {
+  const classes = useStyles();
+
   const { name, participants } = tournament;
   const events = tournament.events ?? [];
 
@@ -49,23 +67,12 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
   const updateEvents = (updatedEvents: StrongmanEvent[]) => {
     tournament.events = updatedEvents;
     saveTournament(tournament);
+    handleCloseEventsModal();
   };
 
   return (
     <div style={{ padding: '20px' }}>
-      <Box
-        sx={{
-          backgroundColor: (theme) => theme.palette.primary.dark,
-          color: 'white',
-          padding: '16px',
-          textAlign: 'center',
-          width: '50%',
-          margin: '0 auto',
-          borderRadius: 5,
-          marginBottom: 2,
-          boxShadow: 3,
-        }}
-      >
+      <Box className={classes.headerBox}>
         <Typography variant="h4">{name}</Typography>
       </Box>
 
@@ -73,24 +80,43 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell rowSpan={2} style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
+              <TableCell
+                rowSpan={2}
+                sx={{
+                  borderRight: '3px solid rgba(224, 224, 224, 1)',
+                  borderBottom: '3px solid rgba(224, 224, 224, 1)',
+                  textAlign: 'center', // Centered text
+                  fontWeight: 'bold', // Example of bold text
+                }}
+              >
                 Participants
               </TableCell>
               {events.length > 0 ? (
                 events.map((event, index) => (
-                  <TableCell key={index} colSpan={2} style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
+                  <TableCell
+                    key={index}
+                    colSpan={2}
+                    sx={{
+                      borderRight: '3px solid rgba(224, 224, 224, 1)',
+                      textAlign: 'center', // Centered text
+                      fontWeight: 'bold', // Example of bold text
+                    }}
+                  >
                     {event.name}
                   </TableCell>
                 ))
               ) : (
                 <TableCell colSpan={2}>No Events yet</TableCell>
               )}
-              <TableCell colSpan={2}>Overall</TableCell>
+              <TableCell colSpan={2} sx={{
+                  textAlign: 'center', // Centered text
+                  fontWeight: 'bold', // Example of bold text
+                }}>Overall</TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow style={{ borderBottom: '3px solid rgba(224, 224, 224, 1)' }}>
               {events.map((_, index) => (
                 <React.Fragment key={index}>
-                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Result</TableCell>
+                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Results</TableCell>
                   <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>Points</TableCell>
                 </React.Fragment>
               ))}
