@@ -58,7 +58,9 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
   const updateParticipants = (newParticipants: string) => {
     const participants = newParticipants.split(',');
     participants.forEach((participant) => {
-      tournament.participants.push(participant);
+      if (participant.trim()){
+        tournament.participants.push(participant);
+      }
     });
     saveTournament(tournament);
     handleCloseParticipantsModal();
