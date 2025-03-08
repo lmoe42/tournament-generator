@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Container, Typography } from '@mui/material';
+import { Button, ButtonGroup, Container } from '@mui/material';
 import React, { useState } from 'react';
 
 import BoltIcon from '@mui/icons-material/Bolt';

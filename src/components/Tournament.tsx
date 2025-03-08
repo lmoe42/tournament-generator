@@ -1,5 +1,5 @@
 import React from 'react';
-import StrongmanTournamentComponent from './TorunamentStrongman'; // Import other tournament components as needed
+import StrongmanTournamentComponent from './TournamentStrongman'; // Import other tournament components as needed
 import { useParams } from 'react-router-dom';
 import {  TournamentTypes, type Tournament } from '../types';
 

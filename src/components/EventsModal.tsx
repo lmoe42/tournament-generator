@@ -14,6 +14,7 @@ import React, { useState } from 'react';
 import { StrongmanEvent, StrongmanEventTypes, Tournament } from '../types';
 
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface EventsModalProps {
   open: boolean;
@@ -39,6 +40,11 @@ const EventsModal: React.FC<EventsModalProps> = ({ open, onClose, onUpdate,tourn
     }
   };
 
+  const handleDeleteEvent = (eventToDelete: StrongmanEvent) => {
+    const updatedEvents = events.filter(event => event.name !== eventToDelete.name);
+    setEvents(updatedEvents);
+  }
+
   return (
     <Modal open={open} onClose={onClose}>
       <div style={{ padding: 24, background: 'white', borderRadius: 8, maxWidth: 400, margin: 'auto' }}>
@@ -46,7 +52,11 @@ const EventsModal: React.FC<EventsModalProps> = ({ open, onClose, onUpdate,tourn
         
         <List>
           {events.map((event, index) => (
-            <ListItem key={index}>
+            <ListItem key={index} secondaryAction={
+              <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteEvent(event)}>
+                <DeleteIcon color="error" />
+              </IconButton>
+            }>
               <ListItemText primary={event.name} secondary={`Type: ${event.type}`} />
             </ListItem>
           ))}
