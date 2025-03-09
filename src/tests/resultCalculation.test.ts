@@ -1,6 +1,6 @@
 // src/utils/__tests__/tournament.test.ts
 
-import { Score, StrongManResults, StrongmanEvent, StrongmanEventTypes, Tournament, TournamentTypes } from '../types';
+import { StrongManResults, StrongmanEventTypes, Tournament, TournamentTypes } from '../types';
 import { calculatePoints, getEventResult } from '../logic/resultCalculation';
 import { describe, expect, it } from 'vitest';
 
@@ -9,16 +9,16 @@ describe('Tournament Functions', () => {
     it('should calculate points correctly for the tournament', () => {
       const tournament: Tournament = {
         name: 'Strongman Championship',
-        participants: ['Alice', 'Bob'],
+        participants: ['Thor', 'Mitchell'],
         type: TournamentTypes.STRONGMAN,
         results: {
           'Deadlift': {
-            "Alice": { performance: 200, points: 0 },
-            "Bob": { performance: 250, points: 0 }
+            "Thor": { performance: 200, points: 0 },
+            "Mitchell": { performance: 250, points: 0 }
           },
           'Log Press': {
-            "Alice": { performance: 100, points: 0 },
-            "Bob": { performance: 150, points: 0 }
+            "Thor": { performance: 100, points: 0 },
+            "Mitchell": { performance: 150, points: 0 }
           }
         },
         events: [
@@ -28,12 +28,12 @@ describe('Tournament Functions', () => {
       };
       const expectResults: StrongManResults = {
         'Deadlift': {
-          "Alice": { performance: 200, points: 1 },
-          "Bob": { performance: 250, points: 2 }
+          "Thor": { performance: 200, points: 1 },
+          "Mitchell": { performance: 250, points: 2 }
         },
         'Log Press': {
-          "Alice": { performance: 100, points: 1 },
-          "Bob": { performance: 150, points: 2 }
+          "Thor": { performance: 100, points: 1 },
+          "Mitchell": { performance: 150, points: 2 }
         }
       };
 
@@ -46,16 +46,33 @@ describe('Tournament Functions', () => {
     it('should sort results and assign points based on performance', () => {
       const results = {
         'Deadlift': {
-          "Alice": { performance: 200, points: 0 },
-          "Bob": { performance: 250, points: 0 },
-          "Charlie": { performance: 250, points: 0 },
+          "Thor": { performance: 450, points: 0 },
+          "Mitchell": { performance: 450, points: 0 },
+          "Tom": { performance: 400, points: 0 },
         }
       };
 
-      const expectedResults = getEventResult(results['Deadlift'], 3); // Assume a maximum of 3 points
-      expect(expectedResults['Bob'].points).toEqual(expectedResults['Charlie'].points);
-      expect(expectedResults['Bob'].points).toEqual(2.5)
-      expect(expectedResults['Alice'].points).toEqual(1)
+      const expectedResults = getEventResult(results['Deadlift'], 3);
+      expect(expectedResults['Mitchell'].points).toEqual(expectedResults['Thor'].points);
+      expect(expectedResults['Mitchell'].points).toEqual(2.5)
+      expect(expectedResults['Tom'].points).toEqual(1)
+    });
+    
+    it('should sort results and assign points based on performance', () => {
+      const results = {
+        'Deadlift': {
+          "Thor": { performance: 470, points: 0 },
+          "Mitchell": { performance: 450, points: 0 },
+          "Tom": { performance: 400, points: 0 },
+          "Maxime": { performance: 0, points: 0 },
+        }
+      };
+
+      const expectedResults = getEventResult(results['Deadlift'], 4);
+      expect(expectedResults['Thor'].points).toEqual(4)
+      expect(expectedResults['Mitchell'].points).toEqual(3)
+      expect(expectedResults['Tom'].points).toEqual(2)
+      expect(expectedResults['Maxime'].points).toEqual(0)
     });
   });
 });
