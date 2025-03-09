@@ -10,6 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
@@ -58,7 +59,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
   const updateParticipants = (newParticipants: string) => {
     const participants = newParticipants.split(',');
     participants.forEach((participant) => {
-      if (participant.trim()){
+      if (participant.trim()) {
         tournament.participants.push(participant);
       }
     });
@@ -110,10 +111,15 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
               ) : (
                 <TableCell colSpan={2}>No Events yet</TableCell>
               )}
-              <TableCell colSpan={2} sx={{
+              <TableCell
+                colSpan={2}
+                sx={{
                   textAlign: 'center', // Centered text
                   fontWeight: 'bold', // Example of bold text
-                }}>Overall</TableCell>
+                }}
+              >
+                Overall
+              </TableCell>
             </TableRow>
             <TableRow style={{ borderBottom: '3px solid rgba(224, 224, 224, 1)' }}>
               {events.map((_, index) => (
@@ -146,7 +152,16 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
                   <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>{participant}</TableCell>
                   {events.map((event, eventIndex) => (
                     <React.Fragment key={eventIndex}>
-                      <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}></TableCell>
+                      <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>
+                        <TextField
+                          variant="filled"
+                          size="small"
+                          onChange={(e) => {
+                            // TODO capture input
+                            const resultValue = e.target.value;
+                          }}
+                        />
+                      </TableCell>
                       <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}></TableCell>
                     </React.Fragment>
                   ))}
