@@ -16,11 +16,13 @@ import {
 import React, { useState } from 'react';
 import { StrongmanEvent, Tournament } from '../types';
 
+import DeleteIcon from '@mui/icons-material/Delete';
 import EventsModal from './EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ParticipantsModal from './ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
 import { Theme } from '@mui/material/styles';
+import { calculatePoints } from 'logic/resultCalculation';
 import { makeStyles } from '@mui/styles';
 import { saveTournament } from 'logic/persistance';
 
@@ -48,6 +50,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
   const { name, participants } = tournament;
   const events = tournament.events ?? [];
 
+  const [tournamentState, setTournamentState] = useState(tournament);
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
   const [eventsModalOpen, setEventsModalOpen] = useState(false);
 
@@ -56,6 +59,12 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
   const handleOpenEventsModal = () => setEventsModalOpen(true);
   const handleCloseEventsModal = () => setEventsModalOpen(false);
 
+  const updateTournament = (tournament: Tournament) => {
+    console.log('updating tournament', tournament);
+    setTournamentState(tournament);
+    saveTournament(tournament);
+  }
+
   const updateParticipants = (newParticipants: string) => {
     const participants = newParticipants.split(',');
     participants.forEach((participant) => {
@@ -63,15 +72,31 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         tournament.participants.push(participant);
       }
     });
-    saveTournament(tournament);
+    updateTournament(tournament);
     handleCloseParticipantsModal();
   };
 
   const updateEvents = (updatedEvents: StrongmanEvent[]) => {
     tournament.events = updatedEvents;
-    saveTournament(tournament);
+    updateTournament(tournament);
     handleCloseEventsModal();
   };
+
+  const setEventResult = (result: string, participant: string, event: string): void => {
+    const performance = result.replace(/\D/g,'');
+
+    tournament.results = tournament.results || {};
+    tournament.results[event] = tournament.results[event] || {}
+    tournament.results[event][participant] = tournament.results[event][participant] || {}
+    tournament.results[event][participant].performance = parseInt(performance);
+    tournament = calculatePoints(tournament);
+    updateTournament(tournament);
+  }
+
+  const clearResults = (): void => {
+    tournament.results = {};
+    updateTournament(tournament);
+  }
 
   return (
     <div style={{ padding: '20px' }}>
@@ -154,15 +179,16 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
                     <React.Fragment key={eventIndex}>
                       <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>
                         <TextField
-                          variant="filled"
+                          variant="standard"
                           size="small"
                           onChange={(e) => {
-                            // TODO capture input
-                            const resultValue = e.target.value;
+                            setEventResult(e.target.value, participant, event.name);
                           }}
                         />
                       </TableCell>
-                      <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}></TableCell>
+                      <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
+                        {tournamentState.results && tournamentState.results[event.name] && tournamentState.results[event.name][participant]?.points}
+                      </TableCell>
                     </React.Fragment>
                   ))}
                   {/* Overall Placeholders */}
@@ -185,8 +211,11 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         >
           Manage Participants
         </Button>
-        <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />} onClick={handleOpenEventsModal}>
+        <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />} style={{ marginRight: '10px' }} onClick={handleOpenEventsModal}>
           Manage Events
+        </Button>
+        <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={clearResults}>
+          clear Results
         </Button>
       </div>
 

@@ -4,8 +4,10 @@ export const calculatePoints = (tournament: Tournament): Tournament => {
   const { events, results, participants } = tournament;
   const maxPoints = participants.length;
   for (const event of events!) {
-    const eventResult = getEventResult(results![event.name], maxPoints);
-    results![event.name] = eventResult;
+    if(results![event.name]) {
+      const eventResult = getEventResult(results![event.name], maxPoints);
+      results![event.name] = eventResult;
+    }
   }
   return tournament;
 };
