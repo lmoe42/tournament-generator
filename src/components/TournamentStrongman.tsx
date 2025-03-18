@@ -95,6 +95,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
     if (confirmDelete) {
       const currentTournament = { ...tournament };
       currentTournament.eventResults = {};
+      currentTournament.overall = {};
       updateTournament(currentTournament);
     }
   }
