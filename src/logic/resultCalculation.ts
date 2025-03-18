@@ -19,7 +19,7 @@ const calculateOverall = (tournament: Tournament): Tournament => {
   for (const participant of tournament.participants) {
     let points = 0;
     for (const event of tournament.events!) {
-      if(tournament.eventResults![event.name] && tournament.eventResults![event.name][participant]) {
+      if (tournament.eventResults![event.name] && tournament.eventResults![event.name][participant]) {
         points += tournament.eventResults![event.name][participant].points;
       }
     }

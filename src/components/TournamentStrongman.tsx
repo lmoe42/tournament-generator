@@ -91,9 +91,12 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
   }
 
   const clearResults = (): void => {
-    const currentTournament = { ...tournament };
-    currentTournament.eventResults = {};
-    updateTournament(currentTournament);
+    const confirmDelete = window.confirm(`Are you sure you want to delete reset all event results for ${tournament.name}?`);
+    if (confirmDelete) {
+      const currentTournament = { ...tournament };
+      currentTournament.eventResults = {};
+      updateTournament(currentTournament);
+    }
   }
 
   return (
