@@ -81,19 +81,18 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
   };
 
   const setEventResult = (result: string, participant: string, event: string): void => {
-    const performance = result.replace(/\D/g,'');
-    let currentTournament = { ...tournament };
-    currentTournament.results = currentTournament.results || {};
-    currentTournament.results[event] = currentTournament.results[event] || {}
-    currentTournament.results[event][participant] = currentTournament.results[event][participant] || {}
-    currentTournament.results[event][participant].performance = parseInt(performance);
+    const performance = result.replace(/[^0-9.]/g, '');    let currentTournament = { ...tournament };
+    currentTournament.eventResults = currentTournament.eventResults || {};
+    currentTournament.eventResults[event] = currentTournament.eventResults[event] || {}
+    currentTournament.eventResults[event][participant] = currentTournament.eventResults[event][participant] || {}
+    currentTournament.eventResults[event][participant].performance = parseInt(performance);
     currentTournament = calculatePoints(tournament);
     updateTournament(currentTournament);
   }
 
   const clearResults = (): void => {
     const currentTournament = { ...tournament };
-    currentTournament.results = {};
+    currentTournament.eventResults = {};
     updateTournament(currentTournament);
   }
 
@@ -180,19 +179,20 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                         <TextField
                           variant="standard"
                           size="small"
+                          value={tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.performance}
                           onChange={(e) => {
                             setEventResult(e.target.value, participant, event.name);
                           }}
                         />
                       </TableCell>
                       <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
-                        {tournament.results && tournament.results[event.name] && tournament.results[event.name][participant]?.points}
+                        {tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.points}
                       </TableCell>
                     </React.Fragment>
                   ))}
                   {/* Overall Placeholders */}
-                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}></TableCell>
-                  <TableCell></TableCell>
+                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>{tournament.overall && tournament.overall[participant]?.points}</TableCell>
+                  <TableCell>{tournament.overall && tournament.overall[participant]?.place}</TableCell>
                 </TableRow>
               ))
             )}

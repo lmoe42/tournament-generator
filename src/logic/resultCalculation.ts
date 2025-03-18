@@ -1,16 +1,42 @@
-import { EventResult, Score, Tournament } from '../types';
+import { EventResult, Placing, Score, Tournament } from '../types';
 
 export const calculatePoints = (tournament: Tournament): Tournament => {
-  const { events, results, participants } = tournament;
+  const { events, eventResults, participants } = tournament;
   const maxPoints = participants.length;
   for (const event of events!) {
-    if(results![event.name]) {
-      const eventResult = getEventResult(results![event.name], maxPoints);
-      results![event.name] = eventResult;
+    if(eventResults![event.name]) {
+      const eventResult = getEventResult(eventResults![event.name], maxPoints);
+      eventResults![event.name] = eventResult;
     }
   }
+  tournament = calculateOverall(tournament);
   return tournament;
 };
+
+const calculateOverall = (tournament: Tournament): Tournament => {
+  const endResult = tournament.overall || Object.fromEntries(tournament.participants.map(key => [key, {} as Placing]));
+
+  for (const participant of tournament.participants) {
+    let points = 0;
+    for (const event of tournament.events!) {
+      if(tournament.eventResults![event.name] && tournament.eventResults![event.name][participant]) {
+        points += tournament.eventResults![event.name][participant].points;
+      }
+    }
+    endResult[participant].points = points;
+  }
+
+  const sortedEntries = Object.entries(endResult).sort(
+    ([, scoreA], [, scoreB]) => scoreB.points - scoreA.points,
+  );
+
+  for (let i = 0; i < sortedEntries.length; i++) {
+    endResult[sortedEntries[i][0]].place = i + 1;
+  }
+
+  tournament.overall = endResult;
+  return tournament;
+}
 
 export const getEventResult = (results: EventResult, maxPoints: number): EventResult => {
   const sortedEntries = Object.entries(results).sort(
