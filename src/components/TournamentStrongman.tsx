@@ -10,16 +10,19 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { StrongmanEvent, Tournament } from '../types';
 
+import DeleteIcon from '@mui/icons-material/Delete';
 import EventsModal from './EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ParticipantsModal from './ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
 import { Theme } from '@mui/material/styles';
+import { calculatePoints } from 'logic/resultCalculation';
 import { makeStyles } from '@mui/styles';
 import { saveTournament } from 'logic/persistance';
 
@@ -38,15 +41,13 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 interface TournamentStrongmanProps {
-  tournament: Tournament;
+  initialTournament: Tournament;
 }
 
-const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament }) => {
+const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTournament }) => {
   const classes = useStyles();
 
-  const { name, participants } = tournament;
-  const events = tournament.events ?? [];
-
+  const [tournament, setTournament] = useState(initialTournament);
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
   const [eventsModalOpen, setEventsModalOpen] = useState(false);
 
@@ -55,27 +56,56 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
   const handleOpenEventsModal = () => setEventsModalOpen(true);
   const handleCloseEventsModal = () => setEventsModalOpen(false);
 
+  const updateTournament = (tournament: Tournament) => {
+    setTournament(tournament);
+    saveTournament(tournament);
+  }
+
   const updateParticipants = (newParticipants: string) => {
     const participants = newParticipants.split(',');
+    const currentTournament = { ...tournament };
     participants.forEach((participant) => {
-      if (participant.trim()){
-        tournament.participants.push(participant);
+      if (participant.trim()) {
+        currentTournament.participants.push(participant);
       }
     });
-    saveTournament(tournament);
+    updateTournament(currentTournament);
     handleCloseParticipantsModal();
   };
 
   const updateEvents = (updatedEvents: StrongmanEvent[]) => {
-    tournament.events = updatedEvents;
-    saveTournament(tournament);
+    const currentTournament = { ...tournament };
+    currentTournament.events = updatedEvents;
+    updateTournament(currentTournament);
     handleCloseEventsModal();
   };
+
+  const setEventResult = (result: string, participant: string, event: string): void => {
+    const performance = result.replace(/[^0-9.]/g, '');
+    let currentTournament = { ...tournament };
+    currentTournament.eventResults = currentTournament.eventResults || {};
+    currentTournament.eventResults[event] = currentTournament.eventResults[event] || {}
+    currentTournament.eventResults[event][participant] = currentTournament.eventResults[event][participant] || {}
+    currentTournament.eventResults[event][participant].performance = parseFloat(performance);
+    currentTournament = calculatePoints(currentTournament);
+    updateTournament(currentTournament);
+  }
+
+  const clearResults = (): void => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete reset all event results for ${tournament.name}?`);
+    if (confirmDelete) {
+      const currentTournament = { ...tournament };
+      currentTournament.eventResults = {};
+      currentTournament.overall = {};
+      updateTournament(currentTournament);
+      window.location.reload();
+    }
+  }
 
   return (
     <div style={{ padding: '20px' }}>
       <Box className={classes.headerBox}>
-        <Typography variant="h4">{name}</Typography>
+        <Typography variant="h4">{tournament.name}</Typography>
       </Box>
 
       <TableContainer component={Paper}>
@@ -93,8 +123,8 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
               >
                 Participants
               </TableCell>
-              {events.length > 0 ? (
-                events.map((event, index) => (
+              {tournament.events!.length > 0 ? (
+                tournament.events?.map((event, index) => (
                   <TableCell
                     key={index}
                     colSpan={2}
@@ -110,13 +140,18 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
               ) : (
                 <TableCell colSpan={2}>No Events yet</TableCell>
               )}
-              <TableCell colSpan={2} sx={{
+              <TableCell
+                colSpan={2}
+                sx={{
                   textAlign: 'center', // Centered text
                   fontWeight: 'bold', // Example of bold text
-                }}>Overall</TableCell>
+                }}
+              >
+                Overall
+              </TableCell>
             </TableRow>
             <TableRow style={{ borderBottom: '3px solid rgba(224, 224, 224, 1)' }}>
-              {events.map((_, index) => (
+              {tournament.events?.map((_, index) => (
                 <React.Fragment key={index}>
                   <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Results</TableCell>
                   <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>Points</TableCell>
@@ -128,10 +163,10 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
             </TableRow>
           </TableHead>
           <TableBody>
-            {participants.length === 0 && events.length === 0 ? (
+            {tournament.participants.length === 0 && tournament.events?.length === 0 ? (
               <TableRow>
                 <TableCell>TBD</TableCell>
-                {events.map((_, index) => (
+                {tournament.events?.map((_, index) => (
                   <React.Fragment key={index}>
                     <TableCell>TBD</TableCell>
                     <TableCell>TBD</TableCell>
@@ -141,18 +176,29 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
                 <TableCell>TBD</TableCell>
               </TableRow>
             ) : (
-              participants.map((participant, participantIndex) => (
+              tournament.participants.map((participant, participantIndex) => (
                 <TableRow key={participantIndex}>
                   <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>{participant}</TableCell>
-                  {events.map((event, eventIndex) => (
+                  {tournament.events?.map((event, eventIndex) => (
                     <React.Fragment key={eventIndex}>
-                      <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}></TableCell>
-                      <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}></TableCell>
+                      <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>
+                        <TextField
+                          variant="standard"
+                          size="small"
+                          defaultValue={tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.performance}
+                          onChange={(e) => {
+                            setEventResult(e.target.value, participant, event.name);
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
+                        {tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.points}
+                      </TableCell>
                     </React.Fragment>
                   ))}
                   {/* Overall Placeholders */}
-                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}></TableCell>
-                  <TableCell></TableCell>
+                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>{tournament.overall && tournament.overall[participant]?.points}</TableCell>
+                  <TableCell>{tournament.overall && tournament.overall[participant]?.place}</TableCell>
                 </TableRow>
               ))
             )}
@@ -170,8 +216,11 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ tournament })
         >
           Manage Participants
         </Button>
-        <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />} onClick={handleOpenEventsModal}>
+        <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />} style={{ marginRight: '10px' }} onClick={handleOpenEventsModal}>
           Manage Events
+        </Button>
+        <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={clearResults}>
+          clear Results
         </Button>
       </div>
 

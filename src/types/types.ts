@@ -7,6 +7,8 @@ export type Tournament = {
     participants: string[];
     type: TournamentTypes;
     events?: StrongmanEvent[];
+    eventResults?: EventResults;
+    overall?: EndResult;
 }
 
 export enum StrongmanEventTypes {
@@ -20,3 +22,19 @@ export type StrongmanEvent = {
     name: string;
     type: StrongmanEventTypes;
 }
+
+export type Score = {
+    performance: number,
+    points: number,
+}
+
+export type Placing = {
+    points: number,
+    place: number,
+}
+
+export type EndResult = Record<string, Placing> // <participant, finalScore>
+
+export type EventResult = Record<string, Score> // <participant, result>
+
+export type EventResults = Record<string, EventResult> // <eventname, EventResult>

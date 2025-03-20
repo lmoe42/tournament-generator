@@ -13,7 +13,7 @@ const Tournament: React.FC = () => {
   const renderTournamentComponent = () => {
     switch (selectedTournament?.type) {
       case TournamentTypes.STRONGMAN:
-        return <StrongmanTournamentComponent tournament={ selectedTournament } />;
+        return <StrongmanTournamentComponent initialTournament={ selectedTournament } />;
       // You can add more cases for other tournament types
       default:
         return <div>No tournament type found.</div>; // Fallback UI
