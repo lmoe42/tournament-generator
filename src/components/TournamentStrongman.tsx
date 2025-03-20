@@ -81,12 +81,13 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
   };
 
   const setEventResult = (result: string, participant: string, event: string): void => {
-    const performance = result.replace(/[^0-9.]/g, '');    let currentTournament = { ...tournament };
+    const performance = result.replace(/[^0-9.]/g, '');
+    let currentTournament = { ...tournament };
     currentTournament.eventResults = currentTournament.eventResults || {};
     currentTournament.eventResults[event] = currentTournament.eventResults[event] || {}
     currentTournament.eventResults[event][participant] = currentTournament.eventResults[event][participant] || {}
-    currentTournament.eventResults[event][participant].performance = parseInt(performance);
-    currentTournament = calculatePoints(tournament);
+    currentTournament.eventResults[event][participant].performance = parseFloat(performance);
+    currentTournament = calculatePoints(currentTournament);
     updateTournament(currentTournament);
   }
 
@@ -97,6 +98,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
       currentTournament.eventResults = {};
       currentTournament.overall = {};
       updateTournament(currentTournament);
+      window.location.reload();
     }
   }
 
@@ -183,7 +185,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                         <TextField
                           variant="standard"
                           size="small"
-                          value={tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.performance}
+                          defaultValue={tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.performance}
                           onChange={(e) => {
                             setEventResult(e.target.value, participant, event.name);
                           }}

@@ -18,6 +18,9 @@ const calculateOverall = (tournament: Tournament): Tournament => {
 
   for (const participant of tournament.participants) {
     let points = 0;
+    if (!endResult[participant]) {
+      endResult[participant] = {} as Placing;
+    }
     for (const event of tournament.events!) {
       if (tournament.eventResults![event.name] && tournament.eventResults![event.name][participant]) {
         points += tournament.eventResults![event.name][participant].points;
@@ -31,7 +34,11 @@ const calculateOverall = (tournament: Tournament): Tournament => {
   );
 
   for (let i = 0; i < sortedEntries.length; i++) {
-    endResult[sortedEntries[i][0]].place = i + 1;
+    if (i > 0 && sortedEntries[i][1].points === sortedEntries[i - 1][1].points) {
+      endResult[sortedEntries[i][0]].place = endResult[sortedEntries[i - 1][0]].place;
+    } else {
+      endResult[sortedEntries[i][0]].place = i + 1;
+    }
   }
 
   tournament.overall = endResult;
