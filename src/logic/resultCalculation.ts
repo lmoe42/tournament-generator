@@ -1,11 +1,12 @@
-import { EventResult, Placing, Score, Tournament } from '../types';
+import { EventResult, Placing, Score, StrongmanEventTypes, Tournament } from '../types';
 
 export const calculatePoints = (tournament: Tournament): Tournament => {
   const { events, eventResults, participants } = tournament;
   const maxPoints = participants.length;
   for (const event of events!) {
-    if(eventResults![event.name]) {
-      const eventResult = getEventResult(eventResults![event.name], maxPoints);
+    const direction = getDirection(event.type);
+    if (eventResults![event.name]) {
+      const eventResult = getEventResult(eventResults![event.name], maxPoints, direction);
       eventResults![event.name] = eventResult;
     }
   }
@@ -14,7 +15,8 @@ export const calculatePoints = (tournament: Tournament): Tournament => {
 };
 
 const calculateOverall = (tournament: Tournament): Tournament => {
-  const endResult = tournament.overall || Object.fromEntries(tournament.participants.map(key => [key, {} as Placing]));
+  const endResult =
+    tournament.overall || Object.fromEntries(tournament.participants.map((key) => [key, {} as Placing]));
 
   for (const participant of tournament.participants) {
     let points = 0;
@@ -29,9 +31,7 @@ const calculateOverall = (tournament: Tournament): Tournament => {
     endResult[participant].points = points;
   }
 
-  const sortedEntries = Object.entries(endResult).sort(
-    ([, scoreA], [, scoreB]) => scoreB.points - scoreA.points,
-  );
+  const sortedEntries = Object.entries(endResult).sort(([, scoreA], [, scoreB]) => scoreB.points - scoreA.points);
 
   for (let i = 0; i < sortedEntries.length; i++) {
     if (i > 0 && sortedEntries[i][1].points === sortedEntries[i - 1][1].points) {
@@ -43,12 +43,10 @@ const calculateOverall = (tournament: Tournament): Tournament => {
 
   tournament.overall = endResult;
   return tournament;
-}
+};
 
-export const getEventResult = (results: EventResult, maxPoints: number): EventResult => {
-  const sortedEntries = Object.entries(results).sort(
-    ([, scoreA], [, scoreB]) => scoreB.performance - scoreA.performance,
-  );
+export const getEventResult = (results: EventResult, maxPoints: number, direction = true): EventResult => {
+  const sortedEntries = getSortedEntries(results, direction);
   let pointsToGive = maxPoints,
     currentPerformance = sortedEntries[0][1].performance,
     entriesToUpdate: [string, Score][] = [sortedEntries[0]];
@@ -67,6 +65,26 @@ export const getEventResult = (results: EventResult, maxPoints: number): EventRe
   updateEntries(entriesToUpdate, pointsToGive, results);
   setZeros(sortedEntries);
   return Object.fromEntries(sortedEntries);
+};
+
+const getSortedEntries = (results: EventResult, direction: boolean) => {
+  const entries = Object.entries(results);
+  return direction
+    ? entries.sort(([, scoreA], [, scoreB]) => scoreB.performance - scoreA.performance)
+    : entries.sort(([, scoreA], [, scoreB]) => scoreA.performance - scoreB.performance);
+};
+
+const getDirection = (type: StrongmanEventTypes): boolean => {
+  switch (type) {
+    case StrongmanEventTypes.WEIGHT:
+    case StrongmanEventTypes.REPS:
+    case StrongmanEventTypes.TIME_E:
+      return true;
+    case StrongmanEventTypes.TIME_S:
+      return false;
+    default:
+      return true;
+  }
 };
 
 export const updateEntries = (entries: [string, Score][], pointsToGive: number, results: EventResult): void => {

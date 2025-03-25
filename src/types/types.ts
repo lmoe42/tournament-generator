@@ -14,7 +14,8 @@ export type Tournament = {
 export enum StrongmanEventTypes {
     WEIGHT = 'weight',
     REPS = 'reps',
-    TIME = 'time',
+    TIME_S = 'time for speed',
+    TIME_E = 'time for endurance',
     CUSTOM = 'custom',
 }
 
