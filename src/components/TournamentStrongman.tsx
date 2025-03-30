@@ -10,12 +10,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TableSortLabel,
   TextField,
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { StrongmanEvent, Tournament } from '../types';
 
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EventsModal from './EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
@@ -48,8 +51,13 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
   const classes = useStyles();
 
   const [tournament, setTournament] = useState(initialTournament);
+
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
   const [eventsModalOpen, setEventsModalOpen] = useState(false);
+
+  const [order, setOrder] = React.useState<'asc' | 'desc'>('asc');
+  const [orderBy, setOrderBy] = React.useState('');
+  const [sortedParticipants, setSortedParticipants] = React.useState<string[]>(tournament.participants);
 
   const handleOpenParticipantsModal = () => setParticipantsModalOpen(true);
   const handleCloseParticipantsModal = () => setParticipantsModalOpen(false);
@@ -59,7 +67,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
   const updateTournament = (tournament: Tournament) => {
     setTournament(tournament);
     saveTournament(tournament);
-  }
+  };
 
   const updateParticipants = (newParticipants: string) => {
     const participants = newParticipants.split(',');
@@ -84,15 +92,17 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
     const performance = result.replace(/[^0-9.]/g, '');
     let currentTournament = { ...tournament };
     currentTournament.eventResults = currentTournament.eventResults || {};
-    currentTournament.eventResults[event] = currentTournament.eventResults[event] || {}
-    currentTournament.eventResults[event][participant] = currentTournament.eventResults[event][participant] || {}
+    currentTournament.eventResults[event] = currentTournament.eventResults[event] || {};
+    currentTournament.eventResults[event][participant] = currentTournament.eventResults[event][participant] || {};
     currentTournament.eventResults[event][participant].performance = parseFloat(performance);
     currentTournament = calculatePoints(currentTournament);
     updateTournament(currentTournament);
-  }
+  };
 
   const clearResults = (): void => {
-    const confirmDelete = window.confirm(`Are you sure you want to delete reset all event results for ${tournament.name}?`);
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete reset all event results for ${tournament.name}?`,
+    );
     if (confirmDelete) {
       const currentTournament = { ...tournament };
       currentTournament.eventResults = {};
@@ -100,7 +110,28 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
       updateTournament(currentTournament);
       window.location.reload();
     }
-  }
+  };
+
+  const sortByPoints = (property: string, isAsc: boolean) => (a: string, b: string) => {
+    if (property === 'overall') {
+      return isAsc
+        ? tournament.overall![a].points - tournament.overall![b].points
+        : tournament.overall![b].points - tournament.overall![a].points;
+    } else {
+      return isAsc
+        ? tournament.eventResults![property][a].points - tournament.eventResults![property][b].points
+        : tournament.eventResults![property][b].points - tournament.eventResults![property][a].points;
+    }
+  };
+
+  const sortTable = (event: React.MouseEvent<unknown>, property: string) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+
+    const ordered = tournament.participants.sort(sortByPoints(property, isAsc));
+    setSortedParticipants(ordered);
+  };
 
   return (
     <div style={{ padding: '20px' }}>
@@ -134,7 +165,14 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                       fontWeight: 'bold', // Example of bold text
                     }}
                   >
-                    {event.name}
+                    <TableSortLabel
+                      active={orderBy === event.name} // Determine if this column is active
+                      direction={order} // Get current sort direction
+                      onClick={(e) => sortTable(e, event.name)} // Handle sorting
+                      sx={{ cursor: 'pointer' }} // Add pointer style
+                    >
+                      {event.name}
+                    </TableSortLabel>
                   </TableCell>
                 ))
               ) : (
@@ -147,7 +185,14 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                   fontWeight: 'bold', // Example of bold text
                 }}
               >
-                Overall
+                <TableSortLabel
+                  active={orderBy === 'overall'} // Determine if this column is active
+                  direction={order} // Get current sort direction
+                  onClick={(e) => sortTable(e, 'overall')} // Handle sorting
+                  sx={{ cursor: 'pointer' }} // Add pointer style
+                >
+                  Overall
+                </TableSortLabel>
               </TableCell>
             </TableRow>
             <TableRow style={{ borderBottom: '3px solid rgba(224, 224, 224, 1)' }}>
@@ -176,7 +221,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                 <TableCell>TBD</TableCell>
               </TableRow>
             ) : (
-              tournament.participants.map((participant, participantIndex) => (
+              sortedParticipants.map((participant, participantIndex) => (
                 <TableRow key={participantIndex}>
                   <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>{participant}</TableCell>
                   {tournament.events?.map((event, eventIndex) => (
@@ -185,19 +230,27 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                         <TextField
                           variant="standard"
                           size="small"
-                          defaultValue={tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.performance}
+                          defaultValue={
+                            tournament.eventResults &&
+                            tournament.eventResults[event.name] &&
+                            tournament.eventResults[event.name][participant]?.performance
+                          }
                           onChange={(e) => {
                             setEventResult(e.target.value, participant, event.name);
                           }}
                         />
                       </TableCell>
                       <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>
-                        {tournament.eventResults && tournament.eventResults[event.name] && tournament.eventResults[event.name][participant]?.points}
+                        {tournament.eventResults &&
+                          tournament.eventResults[event.name] &&
+                          tournament.eventResults[event.name][participant]?.points}
                       </TableCell>
                     </React.Fragment>
                   ))}
                   {/* Overall Placeholders */}
-                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>{tournament.overall && tournament.overall[participant]?.points}</TableCell>
+                  <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>
+                    {tournament.overall && tournament.overall[participant]?.points}
+                  </TableCell>
                   <TableCell>{tournament.overall && tournament.overall[participant]?.place}</TableCell>
                 </TableRow>
               ))
@@ -216,7 +269,13 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
         >
           Manage Participants
         </Button>
-        <Button variant="contained" color="primary" startIcon={<FitnessCenterIcon />} style={{ marginRight: '10px' }} onClick={handleOpenEventsModal}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<FitnessCenterIcon />}
+          style={{ marginRight: '10px' }}
+          onClick={handleOpenEventsModal}
+        >
           Manage Events
         </Button>
         <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={clearResults}>
