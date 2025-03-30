@@ -17,8 +17,6 @@ import {
 import React, { useState } from 'react';
 import { StrongmanEvent, Tournament } from '../types';
 
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EventsModal from './EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
@@ -228,6 +226,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                     <React.Fragment key={eventIndex}>
                       <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>
                         <TextField
+                          key={`${participant}-${event.name}`}
                           variant="standard"
                           size="small"
                           defaultValue={
