@@ -26,6 +26,7 @@ import { Theme } from '@mui/material/styles';
 import { calculatePoints } from 'logic/resultCalculation';
 import { makeStyles } from '@mui/styles';
 import { saveTournament } from 'logic/persistance';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) => ({
   headerBox: {
@@ -46,6 +47,7 @@ interface TournamentStrongmanProps {
 }
 
 const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTournament }) => {
+  const navigate = useNavigate();
   const classes = useStyles();
 
   const [tournament, setTournament] = useState(initialTournament);
@@ -130,6 +132,10 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
     const ordered = tournament.participants.sort(sortByPoints(property, isAsc));
     setSortedParticipants(ordered);
   };
+
+  const finishTournament = () => {
+    navigate(`/tournament/${tournament.name}/results`)
+  }
 
   return (
     <div style={{ padding: '20px' }}>
@@ -279,6 +285,9 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
         </Button>
         <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={clearResults}>
           clear Results
+        </Button>
+        <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={finishTournament}>
+          Finish Tournament
         </Button>
       </div>
 

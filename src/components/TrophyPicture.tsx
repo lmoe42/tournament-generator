@@ -1,18 +1,23 @@
-import React from "react";
+import React from 'react';
+import { ReactSVG } from 'react-svg';
 
-interface SVGProps {
+interface TrophyIconProps {
   color: string;
-  svg: string;
-  width?: string;
+  size: string;
 }
 
-const TrophyPicture: React.FC<SVGProps> = ({ color, svg, width = "300px" }) => {
-
-const decodedSvg = decodeURIComponent(svg);  
-
-  const modifiedSvg = decodedSvg.replace(/fill="#[0-9A-Fa-f]{3,6}"/g, `fill="${color}"`);
-
-  return <div style={{ width, height: "auto" }} dangerouslySetInnerHTML={{ __html: modifiedSvg }} />;
+const TrophyIcon: React.FC<TrophyIconProps> = ({ color, size }) => {
+  return (
+    <ReactSVG
+      src="./src/assets/trophy.svg"
+      beforeInjection={(svg) => {
+        svg.setAttribute('fill', color);
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
+      }}
+      style={{ width: 1000 }}
+    />
+  );
 };
 
-export default TrophyPicture;
+export default TrophyIcon;

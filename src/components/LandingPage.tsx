@@ -5,7 +5,6 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import { Theme } from '@mui/material/styles';
 import TournamentCreationModal from './TournamentCreationModal';
 import TrophyPicture from './TrophyPicture';
-import TrophySvg from '../assets/trophy.svg';
 import { makeStyles } from '@mui/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -84,8 +83,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <Container className={classes.root} maxWidth={false}>
-      {/* <img src={TrophySvg} alt="Welcome" style={{ width: '300px', height: 'auto' }} /> */}
-      <TrophyPicture color="#401d1b" svg={TrophySvg}/>
+      <TrophyPicture color="#1b4a1d" size='300px'/>
       <ButtonGroup variant="contained" className={classes.buttonGroup}>
         <Button onClick={handleExistingTournaments}>Existing Tournaments</Button>
         <span className={classes.iconSeparator}>
