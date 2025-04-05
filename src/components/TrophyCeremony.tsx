@@ -1,10 +1,22 @@
-import React from 'react';
+import { Box, Button, Stack, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import Confetti from 'react-confetti';
 import { Tournament } from 'types';
-import TrophyIcon from './TrophyPicture';
+import Trophy1 from '../assets/trophy1.svg';
+import Trophy2 from '../assets/trophy2.svg';
+import Trophy3 from '../assets/trophy3.svg';
+import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import { useWindowSize } from '@react-hook/window-size';
 
 const TrophyCeremony = () => {
-  const { name } = useParams<{ name: string }>(); // Get tournament name from route
+  const navigate = useNavigate();
+
+  const { name } = useParams<{ name: string }>();
+  const [confettiPieces, setConfettiPieces] = useState(2000);
+  const [width, height] = useWindowSize();
 
   const existingTournaments: Tournament[] = JSON.parse(localStorage.getItem('existingTournaments') || '[]');
   const tournament: Tournament | undefined = existingTournaments.find(
@@ -12,44 +24,74 @@ const TrophyCeremony = () => {
   );
 
   if (!tournament) {
-    return <div className="text-center text-red-500">Tournament not found</div>;
+    return (
+      <Typography align="center" color="error">
+        Tournament not found
+      </Typography>
+    );
   }
 
+  useEffect(() => {
+    // Gradually decrease confetti pieces
+    const interval = setInterval(() => {
+      setConfettiPieces((prev) => {
+        if (prev <= 0) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 10;
+      });
+    }, 100); // Adjust speed here
+    return () => clearInterval(interval);
+  }, []);
+
+  const backToTournament = () => {
+    navigate(`/tournament/${name}`);
+  };
+
   return (
-    <div className="flex flex-col items-center w-full p-4">
-      {/* Podium */}
-      <div className="flex justify-center items-end gap-8 mb-8">
-        {/* Second place */}
-        <div className="flex flex-col items-center">
-          <div className="w-48">
-            <TrophyIcon color="#C0C0C0" size="100px" />
-          </div>
-          <p className="mt-2 text-lg font-semibold">{tournament.participants[1]}</p>
-        </div>
-        {/* First place */}
-        <div className="flex flex-col items-center relative" style={{ top: '-20px' }}>
-          <div className="w-56">
-            <TrophyIcon color="#C0C0C0" size="100px" />
-          </div>
-          <p className="mt-2 text-lg font-semibold">{tournament.participants[0]}</p>
-        </div>
-        {/* Third place */}
-        <div className="flex flex-col items-center">
-          <div className="w-48">
-            <TrophyIcon color="#C0C0C0" size="100px" />
-          </div>
-          <p className="mt-2 text-lg font-semibold">{tournament.participants[2]}</p>
-        </div>
-      </div>
-      {/* Other participants */}
-      <ul className="mt-8 text-center">
+    <Box display="flex" flexDirection="column" alignItems="center" width="100%" marginTop={8} p={4}>
+      {confettiPieces > 0 && <Confetti width={width} height={height} numberOfPieces={confettiPieces} />}
+      {/* Podium Layout */}
+      <Stack direction="row" justifyContent="center" alignItems="flex-end" spacing={6} mb={6}>
+        {/* Second Place */}
+        <Box display="flex" flexDirection="column" alignItems="center" position="relative" top={16}>
+          <Box component="img" src={Trophy2} alt="Second Place Trophy" sx={{ width: 250 }} />
+          <Typography variant="h6" mt={1} fontWeight="bold">
+            2. {tournament.participants[1]}
+          </Typography>
+        </Box>
+
+        {/* First Place */}
+        <Box display="flex" flexDirection="column" alignItems="center" position="relative" top={-16} zIndex={1}>
+          <Box component="img" src={Trophy1} alt="First Place Trophy" sx={{ width: 300 }} />
+          <Typography variant="h5" fontWeight="bold" mt={1}>
+            1. {tournament.participants[0]}
+          </Typography>
+        </Box>
+
+        {/* Third Place */}
+        <Box display="flex" flexDirection="column" alignItems="center" position="relative" top={16}>
+          <Box component="img" src={Trophy3} alt="Third Place Trophy" sx={{ width: 250 }} />
+          <Typography variant="h6" fontWeight="bold" mt={1}>
+            3. {tournament.participants[2]}
+          </Typography>
+        </Box>
+      </Stack>
+
+      {/* Remaining Participants */}
+      <Box mt={4}>
         {tournament.participants.slice(3).map((participant, index) => (
-          <li key={index} className="text-md font-medium mt-1">
-            {participant}
-          </li>
+          <Typography key={index} variant="body1" align="center" mt={1}>
+            {index + 4}. {participant}
+          </Typography>
         ))}
-      </ul>
-    </div>
+
+        <Button variant="contained" color="primary" startIcon={<ArrowBackIcon />} onClick={backToTournament} sx= {{ mt: 6 }}>
+          Back to Tournament
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

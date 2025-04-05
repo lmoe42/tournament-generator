@@ -9,13 +9,13 @@ interface TrophyIconProps {
 const TrophyIcon: React.FC<TrophyIconProps> = ({ color, size }) => {
   return (
     <ReactSVG
-      src="./src/assets/trophy.svg"
+      key={`${color}-${size}`}
+      src="./trophy.svg?v=1"
       beforeInjection={(svg) => {
         svg.setAttribute('fill', color);
         svg.setAttribute('width', size);
         svg.setAttribute('height', size);
       }}
-      style={{ width: 1000 }}
     />
   );
 };
