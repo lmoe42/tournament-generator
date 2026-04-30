@@ -83,6 +83,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <Container className={classes.root} maxWidth={false}>
+      
       <img src={TrophySvg} alt="Welcome" style={{ width: '300px', height: 'auto' }} />
       <ButtonGroup variant="contained" className={classes.buttonGroup}>
         <Button onClick={handleExistingTournaments}>Existing Tournaments</Button>

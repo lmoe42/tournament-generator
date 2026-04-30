@@ -17,6 +17,7 @@ import {
 import React, { useState } from 'react';
 import { StrongmanEvent, Tournament } from '../types';
 
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EventsModal from './EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
@@ -26,6 +27,7 @@ import { Theme } from '@mui/material/styles';
 import { calculatePoints } from 'logic/resultCalculation';
 import { makeStyles } from '@mui/styles';
 import { saveTournament } from 'logic/persistance';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) => ({
   headerBox: {
@@ -46,6 +48,7 @@ interface TournamentStrongmanProps {
 }
 
 const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTournament }) => {
+  const navigate = useNavigate();
   const classes = useStyles();
 
   const [tournament, setTournament] = useState(initialTournament);
@@ -72,7 +75,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
     const currentTournament = { ...tournament };
     participants.forEach((participant) => {
       if (participant.trim()) {
-        currentTournament.participants.push(participant);
+        currentTournament.participants.push(participant.trim());
       }
     });
     updateTournament(currentTournament);
@@ -129,6 +132,18 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
 
     const ordered = tournament.participants.sort(sortByPoints(property, isAsc));
     setSortedParticipants(ordered);
+  };
+
+  const setFinalParticipantOrder = () => {
+    const ordered = tournament.participants.sort(sortByPoints('overall', false));
+    console.log('ordered', ordered);
+    updateTournament({ ...tournament, participants: ordered });
+  }
+
+
+  const finishTournament = () => {
+    setFinalParticipantOrder();
+    navigate(`/tournament/${tournament.name}/results`);
   };
 
   return (
@@ -258,29 +273,35 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
         </Table>
       </TableContainer>
 
-      <div style={{ marginTop: '20px' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<PersonIcon />}
-          style={{ marginRight: '10px' }}
-          onClick={handleOpenParticipantsModal}
-        >
-          Manage Participants
+      <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+        <Box>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<PersonIcon />}
+            sx={{ mr: 1 }}
+            onClick={handleOpenParticipantsModal}
+          >
+            Manage Participants
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<FitnessCenterIcon />}
+            sx={{ mr: 1 }}
+            onClick={handleOpenEventsModal}
+          >
+            Manage Events
+          </Button>
+          <Button variant="contained" color="error" startIcon={<DeleteIcon />} sx={{ mr: 1 }} onClick={clearResults}>
+            Clear Results
+          </Button>
+        </Box>
+
+        <Button variant="contained" color="primary" startIcon={<AssignmentTurnedInIcon />} onClick={finishTournament}>
+          Finish Tournament
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<FitnessCenterIcon />}
-          style={{ marginRight: '10px' }}
-          onClick={handleOpenEventsModal}
-        >
-          Manage Events
-        </Button>
-        <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={clearResults}>
-          clear Results
-        </Button>
-      </div>
+      </Box>
 
       <ParticipantsModal
         open={participantsModalOpen}
