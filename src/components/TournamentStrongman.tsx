@@ -68,14 +68,14 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
   };
 
   const updateParticipants = (newParticipants: string) => {
-    const participants = newParticipants.split(',');
-    const currentTournament = { ...tournament };
-    participants.forEach((participant) => {
-      if (participant.trim()) {
-        currentTournament.participants.push(participant);
-      }
-    });
+    const added = newParticipants
+      .split(',')
+      .filter((p) => p.trim())
+      .map((p) => p.trim());
+    const updatedParticipants = [...tournament.participants, ...added];
+    const currentTournament = { ...tournament, participants: updatedParticipants };
     updateTournament(currentTournament);
+    setSortedParticipants(updatedParticipants);
     handleCloseParticipantsModal();
   };
 
@@ -88,11 +88,12 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
 
   const setEventResult = (result: string, participant: string, event: string): void => {
     const performance = result.replace(/[^0-9.]/g, '');
-    let currentTournament = { ...tournament };
-    currentTournament.eventResults = currentTournament.eventResults || {};
-    currentTournament.eventResults[event] = currentTournament.eventResults[event] || {};
-    currentTournament.eventResults[event][participant] = currentTournament.eventResults[event][participant] || {};
-    currentTournament.eventResults[event][participant].performance = parseFloat(performance);
+    const parsedPerformance = parseFloat(performance);
+    const eventResults = JSON.parse(JSON.stringify(tournament.eventResults || {}));
+    eventResults[event] = eventResults[event] || {};
+    eventResults[event][participant] = eventResults[event][participant] || {};
+    eventResults[event][participant].performance = isNaN(parsedPerformance) ? 0 : parsedPerformance;
+    let currentTournament: Tournament = { ...tournament, eventResults };
     currentTournament = calculatePoints(currentTournament);
     updateTournament(currentTournament);
   };
@@ -112,13 +113,15 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
 
   const sortByPoints = (property: string, isAsc: boolean) => (a: string, b: string) => {
     if (property === 'overall') {
+      if (!tournament.overall || !tournament.overall[a] || !tournament.overall[b]) return 0;
       return isAsc
-        ? tournament.overall![a].points - tournament.overall![b].points
-        : tournament.overall![b].points - tournament.overall![a].points;
+        ? tournament.overall[a].points - tournament.overall[b].points
+        : tournament.overall[b].points - tournament.overall[a].points;
     } else {
-      return isAsc
-        ? tournament.eventResults![property][a].points - tournament.eventResults![property][b].points
-        : tournament.eventResults![property][b].points - tournament.eventResults![property][a].points;
+      if (!tournament.eventResults || !tournament.eventResults[property]) return 0;
+      const eventResult = tournament.eventResults[property];
+      if (!eventResult[a] || !eventResult[b]) return 0;
+      return isAsc ? eventResult[a].points - eventResult[b].points : eventResult[b].points - eventResult[a].points;
     }
   };
 
@@ -127,7 +130,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
 
-    const ordered = tournament.participants.sort(sortByPoints(property, isAsc));
+    const ordered = [...tournament.participants].sort(sortByPoints(property, isAsc));
     setSortedParticipants(ordered);
   };
 
