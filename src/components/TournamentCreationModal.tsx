@@ -35,6 +35,7 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
     const newTournament = {
       name: tournamentName,
       participants: [],
+      events: [],
       type: selectedType,
     };
 
