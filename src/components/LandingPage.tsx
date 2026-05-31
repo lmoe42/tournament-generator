@@ -1,7 +1,8 @@
-import { Box, Button, ButtonGroup, Container } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import { Box, Button, Paper, Stack, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
-import BoltIcon from '@mui/icons-material/Bolt';
 import TournamentCreationModal from 'components/TournamentCreationModal';
 import TrophySvg from 'assets/trophy.svg';
 import { useNavigate } from 'react-router-dom';
@@ -10,64 +11,67 @@ const LandingPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-
-  const handleExistingTournaments = () => {
-    navigate('/tournaments');
-  };
-
   return (
-    <Container
-      maxWidth={false}
+    <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        width: '100vw',
-        textAlign: 'center',
-        color: '#401d1b',
+        display: 'flex',
+        minHeight: 'calc(100vh - 64px)',
+        px: { xs: 2, md: 3 },
+        py: { xs: 3, md: 5 },
       }}
     >
-      <img src={TrophySvg} alt="Tournament trophy icon" style={{ width: '300px', height: 'auto' }} />
-      <ButtonGroup
-        variant="contained"
+      <Paper
+        variant="outlined"
         sx={{
-          marginTop: '2.5rem',
-          '& .MuiButton-root': {
-            backgroundColor: 'primary.main',
-            color: '#fff',
-            padding: '20px 40px',
-            width: '300px',
-            '&:hover': {
-              backgroundColor: 'primary.dark',
-            },
-          },
+          display: 'grid',
+          gap: { xs: 3, md: 5 },
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) 280px' },
+          maxWidth: 980,
+          mx: 'auto',
+          p: { xs: 3, md: 5 },
+          width: '100%',
         }}
       >
-        <Button onClick={handleExistingTournaments}>Existing Tournaments</Button>
+        <Stack spacing={2.5} justifyContent="center">
+          <Box>
+            <Typography variant="overline" color="primary" sx={{ fontWeight: 800 }}>
+              Strongman Workspace
+            </Typography>
+            <Typography variant="h4" sx={{ mt: 0.5 }}>
+              Tournament Generator
+            </Typography>
+            <Typography color="text.secondary" sx={{ maxWidth: 620, mt: 1 }}>
+              Verwalte Strongman-Turniere, Teilnehmer, Events und Ergebnistabellen lokal im Browser.
+            </Typography>
+          </Box>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setModalOpen(true)}>
+              Neues Turnier
+            </Button>
+            <Button variant="outlined" startIcon={<FolderOpenIcon />} onClick={() => navigate('/tournaments')}>
+              Bestehende Turniere
+            </Button>
+          </Stack>
+        </Stack>
+
         <Box
-          component="span"
           sx={{
-            display: 'flex',
             alignItems: 'center',
-            color: '#fff',
-            fontSize: '36px',
-            width: '6px',
-            height: '48px',
+            bgcolor: '#e8f3e8',
+            borderRadius: 2,
+            display: 'flex',
             justifyContent: 'center',
-            zIndex: 1,
+            minHeight: 220,
+            p: 3,
           }}
         >
-          <BoltIcon style={{ fontSize: '136px' }} />
+          <Box component="img" src={TrophySvg} alt="Tournament trophy icon" sx={{ height: 180, width: 'auto' }} />
         </Box>
-        <Button onClick={handleOpenModal}>New Tournament</Button>
-      </ButtonGroup>
+      </Paper>
 
-      <TournamentCreationModal open={modalOpen} onClose={handleCloseModal} />
-    </Container>
+      <TournamentCreationModal open={modalOpen} onClose={() => setModalOpen(false)} />
+    </Box>
   );
 };
 

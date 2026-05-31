@@ -39,11 +39,7 @@ const Tournament: React.FC = () => {
     }
   };
 
-  return (
-    <div style={{ padding: '20px' }}>
-      {renderTournamentComponent()} {/* Render the appropriate tournament component */}
-    </div>
-  );
+  return renderTournamentComponent();
 };
 
 export default Tournament;
