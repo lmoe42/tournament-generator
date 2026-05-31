@@ -3,6 +3,11 @@
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Paper,
   Table,
   TableBody,
@@ -15,33 +20,79 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { StrongmanEvent, Tournament } from '../types';
 
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EventsModal from './EventsModal';
+import EventsModal from 'components/EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import ParticipantsModal from './ParticipantsModal';
+import ParticipantsModal from 'components/ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
-import { Theme } from '@mui/material/styles';
 import { calculatePoints } from 'logic/resultCalculation';
-import { makeStyles } from '@mui/styles';
-import { saveTournament } from 'logic/persistance';
+import { saveTournament } from 'logic/persistence';
+import { EndResult, EventResults, StrongmanEvent, Tournament } from 'types';
 import { useNavigate } from 'react-router-dom';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  headerBox: {
-    backgroundColor: theme.palette.primary.dark,
-    color: 'white',
-    padding: '16px',
-    textAlign: 'center',
-    width: '50%',
-    margin: '0 auto',
-    borderRadius: 20,
-    marginBottom: 20,
-    boxShadow: '3px 3px 5px rgba(0, 0, 0, 0.3)',
-  },
-}));
+const headerSx = {
+  backgroundColor: 'primary.dark',
+  color: 'white',
+  padding: '16px',
+  textAlign: 'center',
+  width: '50%',
+  margin: '0 auto',
+  borderRadius: 2,
+  marginBottom: 2.5,
+  boxShadow: '3px 3px 5px rgba(0, 0, 0, 0.3)',
+};
+
+const cloneEventResults = (eventResults?: EventResults): EventResults => {
+  return Object.fromEntries(
+    Object.entries(eventResults ?? {}).map(([eventName, result]) => [
+      eventName,
+      Object.fromEntries(Object.entries(result).map(([participant, score]) => [participant, { ...score }])),
+    ]),
+  );
+};
+
+const pruneEventResults = (eventResults: EventResults | undefined, participants: string[]): EventResults => {
+  const participantSet = new Set(participants);
+
+  return Object.fromEntries(
+    Object.entries(eventResults ?? {}).map(([eventName, result]) => [
+      eventName,
+      Object.fromEntries(
+        Object.entries(result)
+          .filter(([participant]) => participantSet.has(participant))
+          .map(([participant, score]) => [participant, { ...score }]),
+      ),
+    ]),
+  );
+};
+
+const pruneOverall = (overall: EndResult | undefined, participants: string[]): EndResult | undefined => {
+  if (!overall) {
+    return undefined;
+  }
+
+  const participantSet = new Set(participants);
+  return Object.fromEntries(
+    Object.entries(overall)
+      .filter(([participant]) => participantSet.has(participant))
+      .map(([participant, placing]) => [participant, { ...placing }]),
+  );
+};
+
+const normalizeParticipants = (participants: string[]): string[] => {
+  return Array.from(new Set(participants.map((participant) => participant.trim()).filter(Boolean)));
+};
+
+const hasEnteredResults = (eventResults?: EventResults): boolean => {
+  return Object.values(eventResults ?? {}).some((result) => Object.keys(result).length > 0);
+};
+
+const parsePerformance = (result: string): number => {
+  const performance = Number.parseFloat(result.replace(/[^0-9.]/g, ''));
+  return Number.isFinite(performance) ? performance : 0;
+};
 
 interface TournamentStrongmanProps {
   initialTournament: Tournament;
@@ -49,16 +100,16 @@ interface TournamentStrongmanProps {
 
 const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTournament }) => {
   const navigate = useNavigate();
-  const classes = useStyles();
 
   const [tournament, setTournament] = useState(initialTournament);
 
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
   const [eventsModalOpen, setEventsModalOpen] = useState(false);
+  const [clearResultsDialogOpen, setClearResultsDialogOpen] = useState(false);
 
-  const [order, setOrder] = React.useState<'asc' | 'desc'>('asc');
-  const [orderBy, setOrderBy] = React.useState('');
-  const [sortedParticipants, setSortedParticipants] = React.useState<string[]>(tournament.participants);
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [orderBy, setOrderBy] = useState('');
+  const [sortedParticipants, setSortedParticipants] = useState<string[]>([...tournament.participants]);
 
   const handleOpenParticipantsModal = () => setParticipantsModalOpen(true);
   const handleCloseParticipantsModal = () => setParticipantsModalOpen(false);
@@ -70,85 +121,96 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
     saveTournament(tournament);
   };
 
-  const updateParticipants = (newParticipants: string) => {
-    const participants = newParticipants.split(',');
-    const currentTournament = { ...tournament };
-    participants.forEach((participant) => {
-      if (participant.trim()) {
-        currentTournament.participants.push(participant.trim());
-      }
-    });
+  const updateParticipants = (participants: string[]) => {
+    const updatedParticipants = normalizeParticipants(participants);
+    let currentTournament: Tournament = {
+      ...tournament,
+      participants: updatedParticipants,
+      eventResults: pruneEventResults(tournament.eventResults, updatedParticipants),
+      overall: pruneOverall(tournament.overall, updatedParticipants),
+    };
+
+    if (hasEnteredResults(currentTournament.eventResults)) {
+      currentTournament = calculatePoints(currentTournament);
+    }
+
     updateTournament(currentTournament);
+    setSortedParticipants([...currentTournament.participants]);
     handleCloseParticipantsModal();
   };
 
   const updateEvents = (updatedEvents: StrongmanEvent[]) => {
-    const currentTournament = { ...tournament };
-    currentTournament.events = updatedEvents;
+    const eventNames = new Set(updatedEvents.map((event) => event.name));
+    let currentTournament: Tournament = {
+      ...tournament,
+      events: updatedEvents.map((event) => ({ ...event })),
+      eventResults: Object.fromEntries(
+        Object.entries(tournament.eventResults ?? {}).filter(([eventName]) => eventNames.has(eventName)),
+      ),
+    };
+
+    if (hasEnteredResults(currentTournament.eventResults)) {
+      currentTournament = calculatePoints(currentTournament);
+    } else {
+      currentTournament.overall = undefined;
+    }
+
     updateTournament(currentTournament);
     handleCloseEventsModal();
   };
 
   const setEventResult = (result: string, participant: string, event: string): void => {
-    const performance = result.replace(/[^0-9.]/g, '');
-    let currentTournament = { ...tournament };
-    currentTournament.eventResults = currentTournament.eventResults || {};
-    currentTournament.eventResults[event] = currentTournament.eventResults[event] || {};
-    currentTournament.eventResults[event][participant] = currentTournament.eventResults[event][participant] || {};
-    currentTournament.eventResults[event][participant].performance = parseFloat(performance);
+    const eventResults = cloneEventResults(tournament.eventResults);
+    eventResults[event] = eventResults[event] || {};
+    eventResults[event][participant] = {
+      points: eventResults[event][participant]?.points ?? 0,
+      performance: parsePerformance(result),
+    };
+
+    let currentTournament: Tournament = { ...tournament, eventResults };
     currentTournament = calculatePoints(currentTournament);
     updateTournament(currentTournament);
   };
 
   const clearResults = (): void => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete reset all event results for ${tournament.name}?`,
-    );
-    if (confirmDelete) {
-      const currentTournament = { ...tournament };
-      currentTournament.eventResults = {};
-      currentTournament.overall = {};
-      updateTournament(currentTournament);
-      window.location.reload();
-    }
+    setClearResultsDialogOpen(true);
+  };
+
+  const handleConfirmClearResults = (): void => {
+    const currentTournament = { ...tournament, eventResults: {}, overall: undefined };
+    updateTournament(currentTournament);
+    setSortedParticipants([...currentTournament.participants]);
+    setClearResultsDialogOpen(false);
   };
 
   const sortByPoints = (property: string, isAsc: boolean) => (a: string, b: string) => {
-    if (property === 'overall') {
-      return isAsc
-        ? tournament.overall![a].points - tournament.overall![b].points
-        : tournament.overall![b].points - tournament.overall![a].points;
-    } else {
-      return isAsc
-        ? tournament.eventResults![property][a].points - tournament.eventResults![property][b].points
-        : tournament.eventResults![property][b].points - tournament.eventResults![property][a].points;
-    }
+    const getPoints = (participant: string) =>
+      property === 'overall'
+        ? tournament.overall?.[participant]?.points ?? 0
+        : tournament.eventResults?.[property]?.[participant]?.points ?? 0;
+    return isAsc ? getPoints(a) - getPoints(b) : getPoints(b) - getPoints(a);
   };
 
-  const sortTable = (event: React.MouseEvent<unknown>, property: string) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+  const sortTable = (property: string) => {
+    const nextOrder = orderBy === property && order === 'asc' ? 'desc' : 'asc';
+    const isAsc = nextOrder === 'asc';
+    setOrder(nextOrder);
     setOrderBy(property);
 
-    const ordered = tournament.participants.sort(sortByPoints(property, isAsc));
+    const ordered = [...tournament.participants].sort(sortByPoints(property, isAsc));
     setSortedParticipants(ordered);
   };
 
-  const setFinalParticipantOrder = () => {
-    const ordered = tournament.participants.sort(sortByPoints('overall', false));
-    console.log('ordered', ordered);
-    updateTournament({ ...tournament, participants: ordered });
-  }
-
-
   const finishTournament = () => {
-    setFinalParticipantOrder();
-    navigate(`/tournament/${tournament.name}/results`);
+    const ordered = [...tournament.participants].sort(sortByPoints('overall', false));
+    const updatedTournament = { ...tournament, participants: ordered };
+    updateTournament(updatedTournament);
+    navigate(`/tournament/${encodeURIComponent(tournament.name)}/results`);
   };
 
   return (
     <div style={{ padding: '20px' }}>
-      <Box className={classes.headerBox}>
+      <Box sx={headerSx}>
         <Typography variant="h4">{tournament.name}</Typography>
       </Box>
 
@@ -167,10 +229,10 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
               >
                 Participants
               </TableCell>
-              {tournament.events!.length > 0 ? (
-                tournament.events?.map((event, index) => (
+              {tournament.events && tournament.events.length > 0 ? (
+                tournament.events.map((event) => (
                   <TableCell
-                    key={index}
+                    key={event.name}
                     colSpan={2}
                     sx={{
                       borderRight: '3px solid rgba(224, 224, 224, 1)',
@@ -181,7 +243,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                     <TableSortLabel
                       active={orderBy === event.name} // Determine if this column is active
                       direction={order} // Get current sort direction
-                      onClick={(e) => sortTable(e, event.name)} // Handle sorting
+                      onClick={() => sortTable(event.name)} // Handle sorting
                       sx={{ cursor: 'pointer' }} // Add pointer style
                     >
                       {event.name}
@@ -201,7 +263,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                 <TableSortLabel
                   active={orderBy === 'overall'} // Determine if this column is active
                   direction={order} // Get current sort direction
-                  onClick={(e) => sortTable(e, 'overall')} // Handle sorting
+                  onClick={() => sortTable('overall')} // Handle sorting
                   sx={{ cursor: 'pointer' }} // Add pointer style
                 >
                   Overall
@@ -209,8 +271,8 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
               </TableCell>
             </TableRow>
             <TableRow style={{ borderBottom: '3px solid rgba(224, 224, 224, 1)' }}>
-              {tournament.events?.map((_, index) => (
-                <React.Fragment key={index}>
+              {tournament.events?.map((event) => (
+                <React.Fragment key={event.name}>
                   <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Results</TableCell>
                   <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>Points</TableCell>
                 </React.Fragment>
@@ -224,8 +286,8 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
             {tournament.participants.length === 0 && tournament.events?.length === 0 ? (
               <TableRow>
                 <TableCell>TBD</TableCell>
-                {tournament.events?.map((_, index) => (
-                  <React.Fragment key={index}>
+                {tournament.events?.map((event) => (
+                  <React.Fragment key={event.name}>
                     <TableCell>TBD</TableCell>
                     <TableCell>TBD</TableCell>
                   </React.Fragment>
@@ -234,16 +296,17 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
                 <TableCell>TBD</TableCell>
               </TableRow>
             ) : (
-              sortedParticipants.map((participant, participantIndex) => (
-                <TableRow key={participantIndex}>
+              sortedParticipants.map((participant) => (
+                <TableRow key={participant}>
                   <TableCell style={{ borderRight: '3px solid rgba(224, 224, 224, 1)' }}>{participant}</TableCell>
-                  {tournament.events?.map((event, eventIndex) => (
-                    <React.Fragment key={eventIndex}>
+                  {tournament.events?.map((event) => (
+                    <React.Fragment key={event.name}>
                       <TableCell style={{ borderRight: '1px solid rgba(224, 224, 224, 1)' }}>
                         <TextField
                           key={`${participant}-${event.name}`}
                           variant="standard"
                           size="small"
+                          inputProps={{ 'aria-label': `${participant} ${event.name} result` }}
                           defaultValue={
                             tournament.eventResults &&
                             tournament.eventResults[event.name] &&
@@ -316,6 +379,19 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
         onUpdate={updateEvents}
         tournament={tournament}
       />
+
+      <Dialog open={clearResultsDialogOpen} onClose={() => setClearResultsDialogOpen(false)}>
+        <DialogTitle>Clear Results</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to reset all event results for {tournament.name}?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setClearResultsDialogOpen(false)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleConfirmClearResults}>
+            Clear
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

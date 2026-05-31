@@ -1,41 +1,42 @@
 export enum TournamentTypes {
-    STRONGMAN = 'Strongman',
+  STRONGMAN = 'Strongman',
 }
 
-export type Tournament = { 
-    name: string;
-    participants: string[];
-    type: TournamentTypes;
-    events?: StrongmanEvent[];
-    eventResults?: EventResults;
-    overall?: EndResult;
-}
+export type Tournament = {
+  name: string;
+  participants: string[];
+  type: TournamentTypes;
+  events?: StrongmanEvent[];
+  eventResults?: EventResults;
+  overall?: EndResult;
+};
 
 export enum StrongmanEventTypes {
-    WEIGHT = 'weight',
-    REPS = 'reps',
-    TIME_S = 'time for speed',
-    TIME_E = 'time for endurance',
-    CUSTOM = 'custom',
+  WEIGHT = 'weight',
+  REPS = 'reps',
+  TIME_S = 'time for speed',
+  TIME_E = 'time for endurance',
+  CUSTOM = 'custom',
 }
 
 export type StrongmanEvent = {
-    name: string;
-    type: StrongmanEventTypes;
-}
+  name: string;
+  type: StrongmanEventTypes;
+  higherIsBetter?: boolean;
+};
 
 export type Score = {
-    performance: number,
-    points: number,
-}
+  performance: number;
+  points: number;
+};
 
 export type Placing = {
-    points: number,
-    place: number,
-}
+  points: number;
+  place: number;
+};
 
-export type EndResult = Record<string, Placing> // <participant, finalScore>
+export type EndResult = Record<string, Placing>; // <participant, finalScore>
 
-export type EventResult = Record<string, Score> // <participant, result>
+export type EventResult = Record<string, Score>; // <participant, result>
 
-export type EventResults = Record<string, EventResult> // <eventname, EventResult>
+export type EventResults = Record<string, EventResult>; // <eventname, EventResult>

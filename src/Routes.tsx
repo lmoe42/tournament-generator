@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 
 import ExistingTournaments from 'components/ExistingTournaments';
-import LandingPage from './components/LandingPage';
+import LandingPage from 'components/LandingPage';
 import React from 'react';
 import Tournament from 'components/Tournament';
 import TrophyCeremony from 'components/TrophyCeremony';

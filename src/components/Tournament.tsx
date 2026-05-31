@@ -1,22 +1,41 @@
 import React from 'react';
-import StrongmanTournamentComponent from './TournamentStrongman'; // Import other tournament components as needed
-import { useParams } from 'react-router-dom';
-import {  TournamentTypes, type Tournament } from '../types';
+import { Box, Button, Typography } from '@mui/material';
+import StrongmanTournamentComponent from 'components/TournamentStrongman';
+import { useNavigate, useParams } from 'react-router-dom';
+import { TournamentTypes } from 'types';
+import { getTournament } from 'logic/persistence';
+
+const decodeRouteName = (name: string): string => {
+  try {
+    return decodeURIComponent(name);
+  } catch {
+    return name;
+  }
+};
 
 const Tournament: React.FC = () => {
   const { name } = useParams<{ name: string }>(); // Get tournament name from route
+  const navigate = useNavigate();
 
-  const existingTournaments: Tournament[] = JSON.parse(localStorage.getItem('existingTournaments') || '[]'); 
-  const selectedTournament = existingTournaments.find((tournament: Tournament) => tournament.name === name);
+  const selectedTournament = name ? getTournament(decodeRouteName(name)) : undefined;
 
   // Function to render the correct tournament type component
   const renderTournamentComponent = () => {
     switch (selectedTournament?.type) {
       case TournamentTypes.STRONGMAN:
-        return <StrongmanTournamentComponent initialTournament={ selectedTournament } />;
+        return <StrongmanTournamentComponent initialTournament={selectedTournament} />;
       // You can add more cases for other tournament types
       default:
-        return <div>No tournament type found.</div>; // Fallback UI
+        return (
+          <Box display="flex" flexDirection="column" alignItems="center" gap={2} mt={6}>
+            <Typography variant="h5" color="error">
+              Tournament not found.
+            </Typography>
+            <Button variant="contained" onClick={() => navigate('/tournaments')}>
+              Back to tournaments
+            </Button>
+          </Box>
+        );
     }
   };
 

@@ -3,13 +3,21 @@ import React, { useEffect, useState } from 'react';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Confetti from 'react-confetti';
-import { Tournament } from 'types';
-import Trophy1 from '../assets/trophy1.svg';
-import Trophy2 from '../assets/trophy2.svg';
-import Trophy3 from '../assets/trophy3.svg';
+import Trophy1 from 'assets/trophy1.svg';
+import Trophy2 from 'assets/trophy2.svg';
+import Trophy3 from 'assets/trophy3.svg';
+import { getTournament } from 'logic/persistence';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useWindowSize } from '@react-hook/window-size';
+
+const decodeRouteName = (name: string): string => {
+  try {
+    return decodeURIComponent(name);
+  } catch {
+    return name;
+  }
+};
 
 const TrophyCeremony = () => {
   const navigate = useNavigate();
@@ -18,18 +26,7 @@ const TrophyCeremony = () => {
   const [confettiPieces, setConfettiPieces] = useState(2000);
   const [width, height] = useWindowSize();
 
-  const existingTournaments: Tournament[] = JSON.parse(localStorage.getItem('existingTournaments') || '[]');
-  const tournament: Tournament | undefined = existingTournaments.find(
-    (tournament: Tournament) => tournament.name === name,
-  );
-
-  if (!tournament) {
-    return (
-      <Typography align="center" color="error">
-        Tournament not found
-      </Typography>
-    );
-  }
+  const tournament = name ? getTournament(decodeRouteName(name)) : undefined;
 
   useEffect(() => {
     // Gradually decrease confetti pieces
@@ -45,8 +42,16 @@ const TrophyCeremony = () => {
     return () => clearInterval(interval);
   }, []);
 
+  if (!tournament) {
+    return (
+      <Typography align="center" color="error">
+        Tournament not found
+      </Typography>
+    );
+  }
+
   const backToTournament = () => {
-    navigate(`/tournament/${name}`);
+    navigate(`/tournament/${encodeURIComponent(tournament.name)}`);
   };
 
   return (
@@ -82,12 +87,18 @@ const TrophyCeremony = () => {
       {/* Remaining Participants */}
       <Box mt={4}>
         {tournament.participants.slice(3).map((participant, index) => (
-          <Typography key={index} variant="body1" align="center" mt={1}>
+          <Typography key={participant} variant="body1" align="center" mt={1}>
             {index + 4}. {participant}
           </Typography>
         ))}
 
-        <Button variant="contained" color="primary" startIcon={<ArrowBackIcon />} onClick={backToTournament} sx= {{ mt: 6 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<ArrowBackIcon />}
+          onClick={backToTournament}
+          sx={{ mt: 6 }}
+        >
           Back to Tournament
         </Button>
       </Box>

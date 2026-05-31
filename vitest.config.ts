@@ -1,9 +1,11 @@
 import { defineConfig } from 'vitest/config';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
+  plugins: [tsconfigPaths()],
   test: {
-    globals: true,  // Enables Jest-like global functions like describe, it, expect
-    environment: 'node',  // Use Node environment for running tests
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],  // Adjust to include all your test files
+    globals: true,
+    environment: 'jsdom',
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
   },
 });
