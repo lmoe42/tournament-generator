@@ -1,31 +1,39 @@
-import { EventResult, Placing, Score, StrongmanEventTypes, Tournament } from '../types';
+import { EventResult, EventResults, Placing, Score, StrongmanEvent, StrongmanEventTypes, Tournament } from 'types';
 
 export const calculatePoints = (tournament: Tournament): Tournament => {
-  const { events, eventResults, participants } = tournament;
+  const events = cloneEvents(tournament.events);
+  const eventResults = cloneEventResults(tournament.eventResults);
+  const updatedTournament: Tournament = {
+    ...tournament,
+    participants: [...tournament.participants],
+    events,
+    eventResults,
+    overall: cloneOverall(tournament.overall),
+  };
+  const { participants } = updatedTournament;
   const maxPoints = participants.length;
-  for (const event of events!) {
-    const direction = getDirection(event.type);
-    if (eventResults![event.name]) {
-      const eventResult = getEventResult(eventResults![event.name], maxPoints, direction);
-      eventResults![event.name] = eventResult;
+  for (const event of events) {
+    const direction = getDirection(event);
+    if (eventResults[event.name]) {
+      const eventResult = getEventResult(eventResults[event.name], maxPoints, direction);
+      eventResults[event.name] = eventResult;
     }
   }
-  tournament = calculateOverall(tournament);
-  return tournament;
+  return calculateOverall(updatedTournament);
 };
 
 const calculateOverall = (tournament: Tournament): Tournament => {
   const endResult =
-    tournament.overall || Object.fromEntries(tournament.participants.map((key) => [key, {} as Placing]));
+    tournament.overall || Object.fromEntries(tournament.participants.map((key) => [key, { points: 0, place: 0 }]));
 
   for (const participant of tournament.participants) {
     let points = 0;
     if (!endResult[participant]) {
-      endResult[participant] = {} as Placing;
+      endResult[participant] = { points: 0, place: 0 };
     }
-    for (const event of tournament.events!) {
-      if (tournament.eventResults![event.name] && tournament.eventResults![event.name][participant]) {
-        points += tournament.eventResults![event.name][participant].points;
+    for (const event of tournament.events ?? []) {
+      if (tournament.eventResults?.[event.name]?.[participant]) {
+        points += tournament.eventResults[event.name][participant].points;
       }
     }
     endResult[participant].points = points;
@@ -46,7 +54,12 @@ const calculateOverall = (tournament: Tournament): Tournament => {
 };
 
 export const getEventResult = (results: EventResult, maxPoints: number, direction = true): EventResult => {
-  const sortedEntries = getSortedEntries(results, direction);
+  const cleanResults = normalizeEventResult(results);
+  if (Object.keys(cleanResults).length === 0) {
+    return {};
+  }
+
+  const sortedEntries = getSortedEntries(cleanResults, direction);
   let pointsToGive = maxPoints,
     currentPerformance = sortedEntries[0][1].performance,
     entriesToUpdate: [string, Score][] = [sortedEntries[0]];
@@ -56,32 +69,41 @@ export const getEventResult = (results: EventResult, maxPoints: number, directio
       entriesToUpdate.push(sortedEntries[i]);
       pointsToGive += maxPoints;
     } else {
-      updateEntries(entriesToUpdate, pointsToGive, results);
+      updateEntries(entriesToUpdate, pointsToGive, cleanResults);
       pointsToGive = maxPoints;
       currentPerformance = sortedEntries[i][1].performance;
       entriesToUpdate = [sortedEntries[i]];
     }
   }
-  updateEntries(entriesToUpdate, pointsToGive, results);
+  updateEntries(entriesToUpdate, pointsToGive, cleanResults);
   setZeros(sortedEntries);
   return Object.fromEntries(sortedEntries);
 };
 
 const getSortedEntries = (results: EventResult, direction: boolean) => {
   const entries = Object.entries(results);
-  return direction
-    ? entries.sort(([, scoreA], [, scoreB]) => scoreB.performance - scoreA.performance)
-    : entries.sort(([, scoreA], [, scoreB]) => scoreA.performance - scoreB.performance);
+  return entries.sort(([, scoreA], [, scoreB]) => {
+    if (scoreA.performance === 0 && scoreB.performance !== 0) {
+      return 1;
+    }
+    if (scoreA.performance !== 0 && scoreB.performance === 0) {
+      return -1;
+    }
+
+    return direction ? scoreB.performance - scoreA.performance : scoreA.performance - scoreB.performance;
+  });
 };
 
-const getDirection = (type: StrongmanEventTypes): boolean => {
-  switch (type) {
+const getDirection = (event: StrongmanEvent): boolean => {
+  switch (event.type) {
     case StrongmanEventTypes.WEIGHT:
     case StrongmanEventTypes.REPS:
     case StrongmanEventTypes.TIME_E:
       return true;
     case StrongmanEventTypes.TIME_S:
       return false;
+    case StrongmanEventTypes.CUSTOM:
+      return event.higherIsBetter ?? true;
     default:
       return true;
   }
@@ -99,4 +121,37 @@ export const setZeros = (entries: [string, Score][]): void => {
       entry[1].points = 0;
     }
   }
+};
+
+const normalizeEventResult = (results: EventResult): EventResult => {
+  return Object.fromEntries(
+    Object.entries(results).map(([participant, score]) => [
+      participant,
+      {
+        performance: Number.isFinite(score.performance) ? score.performance : 0,
+        points: Number.isFinite(score.points) ? score.points : 0,
+      },
+    ]),
+  );
+};
+
+const cloneEvents = (events?: StrongmanEvent[]): StrongmanEvent[] => {
+  return events?.map((event) => ({ ...event })) ?? [];
+};
+
+const cloneEventResults = (eventResults?: EventResults): EventResults => {
+  return Object.fromEntries(
+    Object.entries(eventResults ?? {}).map(([eventName, result]) => [
+      eventName,
+      Object.fromEntries(Object.entries(result).map(([participant, score]) => [participant, { ...score }])),
+    ]),
+  );
+};
+
+const cloneOverall = (overall?: Record<string, Placing>): Record<string, Placing> | undefined => {
+  if (!overall) {
+    return undefined;
+  }
+
+  return Object.fromEntries(Object.entries(overall).map(([participant, placing]) => [participant, { ...placing }]));
 };

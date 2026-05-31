@@ -1,7 +1,9 @@
-import { Button, MenuItem, Modal, TextField, Typography } from '@mui/material';
+import { Alert, Button, MenuItem, Modal, TextField, Typography } from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
 import React, { useState } from 'react';
 
-import { TournamentTypes } from '../types'; // Import necessary types
+import { createTournament } from 'logic/persistence';
+import { Tournament, TournamentTypes } from 'types';
 import { useNavigate } from 'react-router-dom';
 
 interface TournamentCreationModalProps {
@@ -12,50 +14,81 @@ interface TournamentCreationModalProps {
 const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open, onClose }) => {
   const [tournamentName, setTournamentName] = useState('');
   const [selectedType, setSelectedType] = useState(TournamentTypes.STRONGMAN);
+  const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
   const validateTournamentName = (name: string) => {
-    const errors: string[] = [];
     if (!name.trim()) {
-      errors.push('Tournament name cannot be empty.');
-    }
-    if (errors.length) {
-      alert(errors.join('\n'));
+      setError('Tournament name cannot be empty.');
       return false;
-    } else {
-      return true;
     }
-  }
+
+    setError('');
+    return true;
+  };
+
+  const resetForm = () => {
+    setTournamentName('');
+    setSelectedType(TournamentTypes.STRONGMAN);
+    setError('');
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   const handleCreateTournament = () => {
     if (!validateTournamentName(tournamentName)) {
       return;
     }
 
-    const newTournament = {
-      name: tournamentName,
+    const name = tournamentName.trim();
+    const newTournament: Tournament = {
+      name,
       participants: [],
       events: [],
       type: selectedType,
     };
 
-    const existingTournaments = JSON.parse(localStorage.getItem('existingTournaments') || '[]');
+    const result = createTournament(newTournament);
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
 
-    existingTournaments.push(newTournament);
-
-    localStorage.setItem('existingTournaments', JSON.stringify(existingTournaments));
-
-    navigate(`/tournament/${tournamentName}`);
+    resetForm();
+    onClose();
+    navigate(`/tournament/${encodeURIComponent(name)}`);
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="create-tournament-modal-title"
+      aria-describedby="create-tournament-modal-description"
+    >
       <div style={{ padding: 24, background: 'white', borderRadius: 8, maxWidth: 400, margin: 'auto' }}>
-        <Typography variant="h6">Create New Tournament</Typography>
+        <Typography id="create-tournament-modal-title" variant="h6">
+          Create New Tournament
+        </Typography>
+        <Typography id="create-tournament-modal-description" sx={visuallyHidden}>
+          Enter a unique tournament name and choose a tournament type.
+        </Typography>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
         <TextField
           label="Tournament Name"
           value={tournamentName}
-          onChange={(e) => setTournamentName(e.target.value)}
+          onChange={(e) => {
+            setTournamentName(e.target.value);
+            setError('');
+          }}
           fullWidth
           margin="normal"
         />
@@ -74,12 +107,7 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
           ))}
         </TextField>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleCreateTournament}
-          fullWidth
-        >
+        <Button variant="contained" color="primary" onClick={handleCreateTournament} fullWidth>
           Create Tournament
         </Button>
       </div>
