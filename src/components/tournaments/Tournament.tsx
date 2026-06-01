@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import StrongmanTournamentComponent from 'components/TournamentStrongman';
+import StrongmanTournamentComponent from 'components/strongman/TournamentStrongman';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TournamentTypes } from 'types';
 import { getTournament } from 'logic/persistence';
@@ -39,11 +39,7 @@ const Tournament: React.FC = () => {
     }
   };
 
-  return (
-    <div style={{ padding: '20px' }}>
-      {renderTournamentComponent()} {/* Render the appropriate tournament component */}
-    </div>
-  );
+  return renderTournamentComponent();
 };
 
 export default Tournament;

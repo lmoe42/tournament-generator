@@ -1,17 +1,15 @@
-// src/components/ParticipantsModal.tsx
-
 import { Button, IconButton, List, ListItem, ListItemText, Modal, TextField, Tooltip, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import React, { useEffect, useState } from 'react';
 
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Tournament } from 'types';
+import { BaseTournament } from 'types';
 
 interface ParticipantsModalProps {
   open: boolean;
   onClose: () => void;
   onUpdate: (participants: string[]) => void;
-  tournament: Tournament;
+  tournament: BaseTournament;
 }
 
 const ParticipantsModal: React.FC<ParticipantsModalProps> = ({ open, onClose, onUpdate, tournament }) => {

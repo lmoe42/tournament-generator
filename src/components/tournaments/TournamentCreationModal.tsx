@@ -1,4 +1,4 @@
-import { Alert, Button, MenuItem, Modal, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, MenuItem, Modal, Stack, TextField, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import React, { useState } from 'react';
 
@@ -49,7 +49,7 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
       name,
       participants: [],
       events: [],
-      type: selectedType,
+      type: TournamentTypes.STRONGMAN,
     };
 
     const result = createTournament(newTournament);
@@ -70,9 +70,22 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
       aria-labelledby="create-tournament-modal-title"
       aria-describedby="create-tournament-modal-description"
     >
-      <div style={{ padding: 24, background: 'white', borderRadius: 8, maxWidth: 400, margin: 'auto' }}>
+      <Box
+        sx={{
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: '0 24px 60px rgba(19, 58, 20, 0.22)',
+          left: '50%',
+          maxWidth: 440,
+          p: 3,
+          position: 'absolute',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 'calc(100% - 32px)',
+        }}
+      >
         <Typography id="create-tournament-modal-title" variant="h6">
-          Create New Tournament
+          Neues Turnier
         </Typography>
         <Typography id="create-tournament-modal-description" sx={visuallyHidden}>
           Enter a unique tournament name and choose a tournament type.
@@ -83,7 +96,7 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
           </Alert>
         )}
         <TextField
-          label="Tournament Name"
+          label="Turniername"
           value={tournamentName}
           onChange={(e) => {
             setTournamentName(e.target.value);
@@ -94,7 +107,7 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
         />
         <TextField
           select
-          label="Tournament Type"
+          label="Turniertyp"
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value as TournamentTypes)}
           fullWidth
@@ -107,10 +120,13 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
           ))}
         </TextField>
 
-        <Button variant="contained" color="primary" onClick={handleCreateTournament} fullWidth>
-          Create Tournament
-        </Button>
-      </div>
+        <Stack direction={{ xs: 'column-reverse', sm: 'row' }} justifyContent="flex-end" spacing={1.5} sx={{ mt: 2 }}>
+          <Button onClick={handleClose}>Abbrechen</Button>
+          <Button variant="contained" color="primary" onClick={handleCreateTournament}>
+            Turnier erstellen
+          </Button>
+        </Stack>
+      </Box>
     </Modal>
   );
 };

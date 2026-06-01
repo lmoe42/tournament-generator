@@ -1,10 +1,10 @@
 import { Route, Routes } from 'react-router-dom';
 
-import ExistingTournaments from 'components/ExistingTournaments';
-import LandingPage from 'components/LandingPage';
+import ExistingTournaments from 'components/tournaments/ExistingTournaments';
+import LandingPage from 'components/app/LandingPage';
 import React from 'react';
-import Tournament from 'components/Tournament';
-import TrophyCeremony from 'components/TrophyCeremony';
+import Tournament from 'components/tournaments/Tournament';
+import TrophyCeremony from 'components/tournaments/TrophyCeremony';
 
 export default function AppRoutes() {
   return (

@@ -1,9 +1,17 @@
-import { EventResult, EventResults, Placing, Score, StrongmanEvent, StrongmanEventTypes, Tournament } from 'types';
+import {
+  EventResult,
+  EventResults,
+  Placing,
+  Score,
+  StrongmanEvent,
+  StrongmanEventTypes,
+  StrongmanTournament,
+} from 'types';
 
-export const calculatePoints = (tournament: Tournament): Tournament => {
+export const calculatePoints = (tournament: StrongmanTournament): StrongmanTournament => {
   const events = cloneEvents(tournament.events);
   const eventResults = cloneEventResults(tournament.eventResults);
-  const updatedTournament: Tournament = {
+  const updatedTournament: StrongmanTournament = {
     ...tournament,
     participants: [...tournament.participants],
     events,
@@ -22,7 +30,7 @@ export const calculatePoints = (tournament: Tournament): Tournament => {
   return calculateOverall(updatedTournament);
 };
 
-const calculateOverall = (tournament: Tournament): Tournament => {
+const calculateOverall = (tournament: StrongmanTournament): StrongmanTournament => {
   const endResult =
     tournament.overall || Object.fromEntries(tournament.participants.map((key) => [key, { points: 0, place: 0 }]));
 

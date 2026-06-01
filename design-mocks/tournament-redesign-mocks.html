@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tournament Generator Redesign Mocks</title>
+    <style>
+      :root {
+        --primary: #2a702c;
+        --primary-dark: #133a14;
+        --primary-soft: #e8f3e8;
+        --accent: #58c08f;
+        --secondary: #9a6598;
+        --secondary-soft: #f5edf4;
+        --bg: #f6f8f5;
+        --surface: #ffffff;
+        --surface-alt: #fbfcfb;
+        --border: #dfe2df;
+        --border-strong: #c5ccc5;
+        --text: #1a231b;
+        --muted: #5f6d5f;
+        --danger: #b42318;
+        --shadow: 0 14px 34px rgba(19, 58, 20, 0.08);
+        --radius: 8px;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 28px;
+      }
+
+      .intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 20px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--primary);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.15;
+      }
+
+      .intro p:last-child {
+        max-width: 780px;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(6, 30px);
+        gap: 8px;
+        padding: 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+
+      .swatch {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .mock {
+        margin-bottom: 28px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .mock-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-alt);
+      }
+
+      .mock-head h2 {
+        font-size: 20px;
+      }
+
+      .mock-head p {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .app {
+        min-height: 680px;
+        background: #eef2ed;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr);
+        min-height: 680px;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        padding: 20px 14px;
+        background: #172217;
+        color: #f2f7f2;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 8px 10px;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius);
+        background: var(--accent);
+        color: #092414;
+        font-weight: 900;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 15px;
+        line-height: 1.1;
+      }
+
+      .brand span {
+        color: #b7c5b7;
+        font-size: 12px;
+      }
+
+      .nav {
+        display: grid;
+        gap: 4px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 40px;
+        padding: 0 10px;
+        border-radius: var(--radius);
+        color: #c9d5c9;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .nav-item.active {
+        background: rgba(88, 192, 143, 0.18);
+        color: #ffffff;
+      }
+
+      .nav-icon {
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        font-size: 12px;
+      }
+
+      .sidebar-note {
+        margin-top: auto;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: var(--radius);
+        color: #c9d5c9;
+        font-size: 13px;
+      }
+
+      .main {
+        min-width: 0;
+        padding: 20px;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .title h2 {
+        font-size: 24px;
+      }
+
+      .title p {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--text);
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .btn.primary {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: #ffffff;
+      }
+
+      .btn.danger {
+        border-color: #f0c7c2;
+        color: var(--danger);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .stat {
+        min-height: 88px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .stat strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 26px;
+        line-height: 1;
+      }
+
+      .stat small {
+        display: block;
+        margin-top: 7px;
+        color: var(--muted);
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(310px, 0.75fr);
+        gap: 16px;
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-alt);
+      }
+
+      .panel-head h3 {
+        font-size: 16px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        min-width: 0;
+        overflow: auto;
+      }
+
+      .tab {
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 7px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .tab.active {
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        background: #fbfcfb;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .strongman-table {
+        min-width: 980px;
+      }
+
+      .strongman-table th,
+      .strongman-table td {
+        border-right: 1px solid var(--border);
+      }
+
+      .strongman-table th:last-child,
+      .strongman-table td:last-child {
+        border-right: 0;
+      }
+
+      .event-head {
+        text-align: center;
+        background: #f4f8f3;
+        color: var(--primary-dark);
+      }
+
+      .event-title {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .sort-icon {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid var(--primary);
+      }
+
+      .sub-head {
+        background: #fbfcfb;
+      }
+
+      .points-cell {
+        color: var(--primary-dark);
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .rank {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-weight: 900;
+      }
+
+      .score-input {
+        width: 84px;
+        min-height: 34px;
+        padding: 0 10px;
+        border: 1px solid var(--border-strong);
+        border-radius: 7px;
+        background: #ffffff;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: var(--secondary-soft);
+        color: #744572;
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .side-list {
+        display: grid;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .card {
+        display: grid;
+        gap: 8px;
+        padding: 13px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: #ffffff;
+      }
+
+      .card-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .progress {
+        height: 8px;
+        border-radius: 999px;
+        background: #edf0ed;
+        overflow: hidden;
+      }
+
+      .progress span {
+        display: block;
+        height: 100%;
+        background: var(--primary);
+      }
+
+      .format-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .format-tabs .tab {
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      .bracket-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 16px;
+      }
+
+      .bracket {
+        min-height: 470px;
+        padding: 18px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: #ffffff;
+        overflow: auto;
+      }
+
+      .rounds {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        gap: 18px;
+        min-width: 760px;
+      }
+
+      .round {
+        display: grid;
+        gap: 16px;
+        align-content: start;
+      }
+
+      .round h3 {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .match {
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      .player {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 38px;
+        padding: 0 10px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .player:last-child {
+        border-bottom: 0;
+      }
+
+      .player.win {
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-weight: 900;
+      }
+
+      .score {
+        display: grid;
+        place-items: center;
+        min-width: 26px;
+        height: 24px;
+        border-radius: 6px;
+        background: #eff2ef;
+        font-weight: 900;
+      }
+
+      .builder,
+      .steps {
+        display: grid;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: #ffffff;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .field input,
+      .field select,
+      .search {
+        min-height: 40px;
+        padding: 0 10px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        background: #ffffff;
+      }
+
+      .toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 42px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+
+      .switch {
+        width: 42px;
+        height: 24px;
+        padding: 3px;
+        border-radius: 999px;
+        background: var(--primary);
+      }
+
+      .switch::before {
+        content: "";
+        display: block;
+        width: 18px;
+        height: 18px;
+        margin-left: auto;
+        border-radius: 50%;
+        background: #ffffff;
+      }
+
+      .manager {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 350px;
+        gap: 16px;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: #ffffff;
+      }
+
+      .step-index {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .step span:last-child {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 1120px) {
+        .shell,
+        .workspace,
+        .bracket-shell,
+        .manager {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          min-height: auto;
+        }
+
+        .nav {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .sidebar-note {
+          display: none;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          padding: 16px 12px 32px;
+        }
+
+        .intro,
+        .mock-head,
+        .topbar,
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .actions {
+          justify-content: start;
+        }
+
+        h1 {
+          font-size: 26px;
+        }
+
+        .main {
+          padding: 14px;
+        }
+
+        .nav {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .stats {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        table {
+          min-width: 680px;
+        }
+
+        .panel {
+          overflow: auto;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .stats {
+          grid-template-columns: 1fr;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="intro">
+        <div>
+          <p class="eyebrow">Design Review</p>
+          <h1>Tournament Generator: UI-Richtungen</h1>
+          <p>
+            MUI-kompatible Mockups mit professioneller Informationsdichte, ruhigem Farbsystem und klaren Workflows
+            fuer den bestehenden Strongman Workflow.
+          </p>
+        </div>
+        <div class="palette" aria-label="Farbpalette">
+          <span class="swatch" style="background: #2a702c"></span>
+          <span class="swatch" style="background: #58c08f"></span>
+          <span class="swatch" style="background: #9a6598"></span>
+          <span class="swatch" style="background: #b87911"></span>
+          <span class="swatch" style="background: #f6f8f5"></span>
+          <span class="swatch" style="background: #1a231b"></span>
+        </div>
+      </header>
+
+      <section class="mock">
+        <div class="mock-head">
+          <div>
+            <h2>Variante A: Operations Console</h2>
+            <p>Empfohlen: Dashboard, Turnierliste und aktive Arbeitsansicht in einer stabilen App-Shell.</p>
+          </div>
+          <span class="tag">Empfehlung</span>
+        </div>
+
+        <div class="app shell">
+          <aside class="sidebar">
+            <div class="brand">
+              <div class="brand-mark">TG</div>
+              <div><strong>Tournament Generator</strong><span>Local workspace</span></div>
+            </div>
+            <nav class="nav">
+              <div class="nav-item active"><span class="nav-icon">D</span>Dashboard</div>
+              <div class="nav-item"><span class="nav-icon">T</span>Turniere</div>
+              <div class="nav-item"><span class="nav-icon">P</span>Personen</div>
+              <div class="nav-item"><span class="nav-icon">V</span>Vorlagen</div>
+            </nav>
+            <div class="sidebar-note">Sommer Cup 2026<br />Runde 3 von 5 aktiv</div>
+          </aside>
+
+          <section class="main">
+            <div class="topbar">
+              <div class="title">
+                <h2>Turnieruebersicht</h2>
+                <p>Aktive Turniere, offene Eingaben und naechste Entscheidungen.</p>
+              </div>
+              <div class="actions">
+                <button class="btn primary">+ Neues Turnier</button>
+              </div>
+            </div>
+
+            <div class="stats">
+              <div class="stat"><span>Aktiv</span><strong>4</strong><small>2 heute bearbeitet</small></div>
+              <div class="stat"><span>Teilnehmer</span><strong>86</strong><small>ueber alle Turniere</small></div>
+              <div class="stat"><span>Offene Felder</span><strong>18</strong><small>6 Ergebnisse fehlen</small></div>
+              <div class="stat"><span>Abgeschlossen</span><strong>12</strong><small>lokal gespeichert</small></div>
+            </div>
+
+            <div class="workspace">
+              <div class="panel">
+                <div class="panel-head">
+                  <h3>Sommer Cup 2026</h3>
+                  <div class="tabs">
+                    <span class="tab active">Wertung</span><span class="tab">Teilnehmer</span><span class="tab">Events</span>
+                  </div>
+                </div>
+                <table class="strongman-table">
+                  <thead>
+                    <tr>
+                      <th rowspan="2">Teilnehmer</th>
+                      <th class="event-head" colspan="2"><span class="event-title">Deadlift <span class="sort-icon"></span></span></th>
+                      <th class="event-head" colspan="2"><span class="event-title">Carry <span class="sort-icon"></span></span></th>
+                      <th class="event-head" colspan="2"><span class="event-title">Truck Pull <span class="sort-icon"></span></span></th>
+                      <th class="event-head" colspan="2"><span class="event-title">Overall <span class="sort-icon"></span></span></th>
+                    </tr>
+                    <tr>
+                      <th class="sub-head">Ergebnis</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Ergebnis</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Ergebnis</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Platz</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Max Berger</strong></td>
+                      <td><input class="score-input" value="280 kg" /></td><td class="points-cell">10</td>
+                      <td><input class="score-input" value="18.2 s" /></td><td class="points-cell">9</td>
+                      <td><input class="score-input" value="34.4 s" /></td><td class="points-cell">9</td>
+                      <td class="points-cell"><span class="pill">28</span></td><td><span class="rank">1</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Jonas Keller</strong></td>
+                      <td><input class="score-input" value="270 kg" /></td><td class="points-cell">8</td>
+                      <td><input class="score-input" value="19.1 s" /></td><td class="points-cell">8</td>
+                      <td><input class="score-input" value="33.8 s" /></td><td class="points-cell">10</td>
+                      <td class="points-cell"><span class="pill">26</span></td><td><span class="rank">2</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Rico Stein</strong></td>
+                      <td><input class="score-input" value="255 kg" /></td><td class="points-cell">7</td>
+                      <td><input class="score-input" value="18.8 s" /></td><td class="points-cell">10</td>
+                      <td><input class="score-input" value="" /></td><td class="points-cell">0</td>
+                      <td class="points-cell"><span class="pill">17</span></td><td><span class="rank">3</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <aside class="panel">
+                <div class="panel-head"><h3>Meine Turniere</h3><button class="btn">Filter</button></div>
+                <div class="side-list">
+                  <div class="card">
+                    <div class="card-line"><strong>Sommer Cup 2026</strong><span class="pill">Strongman</span></div>
+                    <div class="progress"><span style="width: 64%"></span></div>
+                    <div class="card-line"><small>18 Teilnehmer</small><small>64%</small></div>
+                    <div class="card-line"><button class="btn">Oeffnen</button><button class="btn danger">Loeschen</button></div>
+                  </div>
+                  <div class="card">
+                    <div class="card-line"><strong>Heavy Classic</strong><span class="pill">Strongman</span></div>
+                    <div class="progress"><span style="width: 38%"></span></div>
+                    <div class="card-line"><small>12 Teilnehmer</small><small>38%</small></div>
+                    <div class="card-line"><button class="btn">Oeffnen</button><button class="btn danger">Loeschen</button></div>
+                  </div>
+                  <div class="card">
+                    <div class="card-line"><strong>Gym Qualifier</strong><span class="pill">Strongman</span></div>
+                    <div class="progress"><span style="width: 20%"></span></div>
+                    <div class="card-line"><small>8 Teilnehmer</small><small>Setup</small></div>
+                    <div class="card-line"><button class="btn">Oeffnen</button><button class="btn danger">Loeschen</button></div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="mock">
+        <div class="mock-head">
+          <div>
+            <h2>Strongman Detailansicht</h2>
+            <p>Modernisierte Version der aktuellen Punkte- und Ergebnistabelle mit klarerem Arbeitsbereich.</p>
+          </div>
+          <span class="tag">Detail Screen</span>
+        </div>
+
+        <div class="app">
+          <section class="main">
+            <div class="topbar">
+              <div class="title"><h2>Sommer Cup 2026</h2><p>Strongman · 18 Teilnehmer · 5 Events · autosaved lokal</p></div>
+              <div class="actions">
+                <button class="btn">Teilnehmer</button>
+                <button class="btn">Events</button>
+                <button class="btn">Ergebnisse leeren</button>
+                <button class="btn primary">Turnier abschliessen</button>
+              </div>
+            </div>
+            <div class="format-tabs">
+              <span class="tab active">Wertung</span><span class="tab">Event-Eingabe</span><span class="tab">Teilnehmer</span><span class="tab">Events</span><span class="tab">Historie</span>
+            </div>
+            <div class="workspace">
+              <div class="panel">
+                <div class="panel-head">
+                  <h3>Gesamtwertung</h3>
+                  <div class="tabs">
+                    <span class="tab active">Alle Events</span><span class="tab">Nur offene Felder</span><span class="tab">Nach Punkten</span>
+                  </div>
+                </div>
+                <table class="strongman-table">
+                  <thead>
+                    <tr>
+                      <th rowspan="2">Teilnehmer</th>
+                      <th class="event-head" colspan="2"><span class="event-title">Deadlift <span class="sort-icon"></span></span></th>
+                      <th class="event-head" colspan="2"><span class="event-title">Carry <span class="sort-icon"></span></span></th>
+                      <th class="event-head" colspan="2"><span class="event-title">Truck Pull <span class="sort-icon"></span></span></th>
+                      <th class="event-head" colspan="2"><span class="event-title">Log Lift <span class="sort-icon"></span></span></th>
+                      <th class="event-head" colspan="2"><span class="event-title">Overall <span class="sort-icon"></span></span></th>
+                    </tr>
+                    <tr>
+                      <th class="sub-head">Ergebnis</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Ergebnis</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Ergebnis</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Ergebnis</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Punkte</th>
+                      <th class="sub-head">Platz</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Max Berger</strong></td>
+                      <td><input class="score-input" value="280" /></td><td class="points-cell">10</td>
+                      <td><input class="score-input" value="18.2" /></td><td class="points-cell">9</td>
+                      <td><input class="score-input" value="34.4" /></td><td class="points-cell">9</td>
+                      <td><input class="score-input" value="11" /></td><td class="points-cell">10</td>
+                      <td class="points-cell"><span class="pill">38</span></td><td><span class="rank">1</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Jonas Keller</strong></td>
+                      <td><input class="score-input" value="270" /></td><td class="points-cell">8</td>
+                      <td><input class="score-input" value="19.1" /></td><td class="points-cell">8</td>
+                      <td><input class="score-input" value="33.8" /></td><td class="points-cell">10</td>
+                      <td><input class="score-input" value="10" /></td><td class="points-cell">10</td>
+                      <td class="points-cell"><span class="pill">36</span></td><td><span class="rank">2</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Rico Stein</strong></td>
+                      <td><input class="score-input" value="255" /></td><td class="points-cell">7</td>
+                      <td><input class="score-input" value="18.8" /></td><td class="points-cell">10</td>
+                      <td><input class="score-input" value="" /></td><td class="points-cell">0</td>
+                      <td><input class="score-input" value="9" /></td><td class="points-cell">10</td>
+                      <td class="points-cell"><span class="pill">27</span></td><td><span class="rank">3</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Paul Roth</strong></td>
+                      <td><input class="score-input" value="250" /></td><td class="points-cell">6</td>
+                      <td><input class="score-input" value="" /></td><td class="points-cell">0</td>
+                      <td><input class="score-input" value="36.1" /></td><td class="points-cell">7</td>
+                      <td><input class="score-input" value="8" /></td><td class="points-cell">9</td>
+                      <td class="points-cell"><span class="pill">22</span></td><td><span class="rank">4</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <aside class="builder">
+                <h3>Eventstatus</h3>
+                <div class="card">
+                  <div class="card-line"><strong>Deadlift</strong><span class="pill">18/18</span></div>
+                  <div class="progress"><span style="width: 100%"></span></div>
+                </div>
+                <div class="card">
+                  <div class="card-line"><strong>Carry</strong><span class="pill">16/18</span></div>
+                  <div class="progress"><span style="width: 89%"></span></div>
+                </div>
+                <div class="card">
+                  <div class="card-line"><strong>Truck Pull</strong><span class="pill">17/18</span></div>
+                  <div class="progress"><span style="width: 94%"></span></div>
+                </div>
+                <div class="field"><label>Aktives Event</label><select><option>Truck Pull</option><option>Carry</option><option>Deadlift</option></select></div>
+                <button class="btn primary">Offene Ergebnisse anzeigen</button>
+              </aside>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="mock">
+        <div class="mock-head">
+          <div>
+            <h2>Strongman Verwaltung</h2>
+            <p>Redesign der aktuellen Teilnehmer- und Event-Konfiguration ohne neue Turnierlogik.</p>
+          </div>
+          <span class="tag">Modals & Setup</span>
+        </div>
+
+        <div class="app">
+          <section class="main">
+            <div class="topbar">
+              <div class="title"><h2>Teilnehmer & Events</h2><p>Bearbeitungsansicht fuer bestehende Strongman-Turniere.</p></div>
+              <button class="btn primary">Aenderungen speichern</button>
+            </div>
+            <div class="manager">
+              <div>
+                <div class="toolbar">
+                  <input class="search" value="Teilnehmer suchen" />
+                  <button class="btn">+ Teilnehmer</button>
+                  <button class="btn">Duplikate pruefen</button>
+                </div>
+                <div class="panel">
+                  <table>
+                    <thead><tr><th>Name</th><th>Status</th><th>Events komplett</th><th>Aktion</th></tr></thead>
+                    <tbody>
+                      <tr><td><strong>Max Berger</strong></td><td><span class="pill">Aktiv</span></td><td>4/4</td><td><button class="btn">Bearbeiten</button></td></tr>
+                      <tr><td><strong>Jonas Keller</strong></td><td><span class="pill">Aktiv</span></td><td>4/4</td><td><button class="btn">Bearbeiten</button></td></tr>
+                      <tr><td><strong>Rico Stein</strong></td><td><span class="pill">Offen</span></td><td>3/4</td><td><button class="btn">Bearbeiten</button></td></tr>
+                      <tr><td><strong>Paul Roth</strong></td><td><span class="pill">Offen</span></td><td>3/4</td><td><button class="btn">Bearbeiten</button></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <aside class="steps">
+                <h3>Events</h3>
+                <div class="field"><label>Name</label><input value="Truck Pull" /></div>
+                <div class="field"><label>Wertungstyp</label><select><option>Zeit fuer Geschwindigkeit</option><option>Gewicht</option><option>Wiederholungen</option></select></div>
+                <div class="toggle"><span>Hoeherer Wert gewinnt</span><span class="switch"></span></div>
+                <div class="toggle"><span>Event in Gesamtwertung</span><span class="switch"></span></div>
+                <button class="btn primary">Event aktualisieren</button>
+              </aside>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
