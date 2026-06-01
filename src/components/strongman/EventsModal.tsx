@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import React, { useEffect, useState } from 'react';
-import { StrongmanEvent, StrongmanEventTypes, Tournament } from 'types';
+import { StrongmanEvent, StrongmanEventTypes, StrongmanTournament } from 'types';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,7 +23,7 @@ interface EventsModalProps {
   open: boolean;
   onClose: () => void;
   onUpdate: (events: StrongmanEvent[]) => void;
-  tournament: Tournament;
+  tournament: StrongmanTournament;
 }
 
 const EventsModal: React.FC<EventsModalProps> = ({ open, onClose, onUpdate, tournament }) => {

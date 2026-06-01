@@ -1,5 +1,3 @@
-// src/components/TournamentStrongman.tsx
-
 import {
   Box,
   Button,
@@ -26,13 +24,13 @@ import React, { useState } from 'react';
 
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EventsModal from 'components/EventsModal';
+import EventsModal from 'components/strongman/EventsModal';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import ParticipantsModal from 'components/ParticipantsModal';
+import ParticipantsModal from 'components/tournaments/ParticipantsModal';
 import PersonIcon from '@mui/icons-material/Person';
-import { calculatePoints } from 'logic/resultCalculation';
+import { calculatePoints } from 'logic/strongman/resultCalculation';
 import { saveTournament } from 'logic/persistence';
-import { EndResult, EventResults, StrongmanEvent, Tournament } from 'types';
+import { EndResult, EventResults, StrongmanEvent, StrongmanTournament } from 'types';
 import { useNavigate } from 'react-router-dom';
 
 const pageSx = {
@@ -45,6 +43,7 @@ const panelSx = {
   borderColor: 'divider',
   borderRadius: 2,
   boxShadow: '0 10px 28px rgba(19, 58, 20, 0.06)',
+  minWidth: 0,
   overflow: 'hidden',
 };
 
@@ -132,7 +131,7 @@ const getEventResultCount = (eventResults: EventResults | undefined, eventName: 
 };
 
 interface TournamentStrongmanProps {
-  initialTournament: Tournament;
+  initialTournament: StrongmanTournament;
 }
 
 const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTournament }) => {
@@ -153,14 +152,14 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
   const handleOpenEventsModal = () => setEventsModalOpen(true);
   const handleCloseEventsModal = () => setEventsModalOpen(false);
 
-  const updateTournament = (tournament: Tournament) => {
+  const updateTournament = (tournament: StrongmanTournament) => {
     setTournament(tournament);
     saveTournament(tournament);
   };
 
   const updateParticipants = (participants: string[]) => {
     const updatedParticipants = normalizeParticipants(participants);
-    let currentTournament: Tournament = {
+    let currentTournament: StrongmanTournament = {
       ...tournament,
       participants: updatedParticipants,
       eventResults: pruneEventResults(tournament.eventResults, updatedParticipants),
@@ -178,7 +177,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
 
   const updateEvents = (updatedEvents: StrongmanEvent[]) => {
     const eventNames = new Set(updatedEvents.map((event) => event.name));
-    let currentTournament: Tournament = {
+    let currentTournament: StrongmanTournament = {
       ...tournament,
       events: updatedEvents.map((event) => ({ ...event })),
       eventResults: Object.fromEntries(
@@ -204,7 +203,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
       performance: parsePerformance(result),
     };
 
-    let currentTournament: Tournament = { ...tournament, eventResults };
+    let currentTournament: StrongmanTournament = { ...tournament, eventResults };
     currentTournament = calculatePoints(currentTournament);
     updateTournament(currentTournament);
   };
@@ -289,7 +288,7 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
           gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 320px' },
         }}
       >
-        <TableContainer component={Paper} sx={panelSx}>
+        <Paper variant="outlined" sx={panelSx}>
           <Box
             sx={{
               alignItems: { xs: 'flex-start', sm: 'center' },
@@ -310,113 +309,115 @@ const TournamentStrongman: React.FC<TournamentStrongmanProps> = ({ initialTourna
               <Chip label={`${completionPercent}%`} size="small" color="secondary" variant="outlined" />
             </Stack>
           </Box>
-          <Table stickyHeader size="small" sx={{ minWidth: Math.max(720, 220 + events.length * 220 + 150) }}>
-            <TableHead>
-              <TableRow>
-                <TableCell
-                  rowSpan={2}
-                  sx={{
-                    bgcolor: '#fbfcfb',
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    borderRight: '1px solid',
-                    fontWeight: 900,
-                    minWidth: 180,
-                  }}
-                >
-                  Teilnehmer
-                </TableCell>
-                {events.length > 0 ? (
-                  events.map((event) => (
-                    <TableCell key={event.name} colSpan={2} sx={eventHeaderSx}>
-                      <TableSortLabel
-                        active={orderBy === event.name}
-                        direction={orderBy === event.name ? order : 'asc'}
-                        hideSortIcon={false}
-                        onClick={() => sortTable(event.name)}
-                      >
-                        {event.name}
-                      </TableSortLabel>
-                    </TableCell>
-                  ))
-                ) : (
-                  <TableCell colSpan={2} sx={eventHeaderSx}>
-                    Keine Events
-                  </TableCell>
-                )}
-                <TableCell colSpan={2} sx={{ ...eventHeaderSx, borderRight: 0 }}>
-                  <TableSortLabel
-                    active={orderBy === 'overall'}
-                    direction={orderBy === 'overall' ? order : 'asc'}
-                    hideSortIcon={false}
-                    onClick={() => sortTable('overall')}
-                  >
-                    Overall
-                  </TableSortLabel>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                {events.map((event) => (
-                  <React.Fragment key={event.name}>
-                    <TableCell sx={subHeaderSx}>Ergebnis</TableCell>
-                    <TableCell sx={subHeaderSx}>Punkte</TableCell>
-                  </React.Fragment>
-                ))}
-                <TableCell sx={subHeaderSx}>Punkte</TableCell>
-                <TableCell sx={{ ...subHeaderSx, borderRight: 0 }}>Platz</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tournament.participants.length === 0 ? (
+          <TableContainer sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+            <Table stickyHeader size="small" sx={{ minWidth: Math.max(720, 220 + events.length * 220 + 150) }}>
+              <TableHead>
                 <TableRow>
                   <TableCell
-                    colSpan={events.length * 2 + 3}
-                    sx={{ color: 'text.secondary', py: 4, textAlign: 'center' }}
+                    rowSpan={2}
+                    sx={{
+                      bgcolor: '#fbfcfb',
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      borderRight: '1px solid',
+                      fontWeight: 900,
+                      minWidth: 180,
+                    }}
                   >
-                    Noch keine Teilnehmer vorhanden.
+                    Teilnehmer
+                  </TableCell>
+                  {events.length > 0 ? (
+                    events.map((event) => (
+                      <TableCell key={event.name} colSpan={2} sx={eventHeaderSx}>
+                        <TableSortLabel
+                          active={orderBy === event.name}
+                          direction={orderBy === event.name ? order : 'asc'}
+                          hideSortIcon={false}
+                          onClick={() => sortTable(event.name)}
+                        >
+                          {event.name}
+                        </TableSortLabel>
+                      </TableCell>
+                    ))
+                  ) : (
+                    <TableCell colSpan={2} sx={eventHeaderSx}>
+                      Keine Events
+                    </TableCell>
+                  )}
+                  <TableCell colSpan={2} sx={{ ...eventHeaderSx, borderRight: 0 }}>
+                    <TableSortLabel
+                      active={orderBy === 'overall'}
+                      direction={orderBy === 'overall' ? order : 'asc'}
+                      hideSortIcon={false}
+                      onClick={() => sortTable('overall')}
+                    >
+                      Overall
+                    </TableSortLabel>
                   </TableCell>
                 </TableRow>
-              ) : (
-                sortedParticipants.map((participant) => (
-                  <TableRow key={participant} hover>
-                    <TableCell sx={{ borderRight: '1px solid', borderColor: 'divider', fontWeight: 800 }}>
-                      {participant}
-                    </TableCell>
-                    {events.map((event) => (
-                      <React.Fragment key={event.name}>
-                        <TableCell sx={resultCellSx}>
-                          <TextField
-                            key={`${participant}-${event.name}`}
-                            variant="outlined"
-                            size="small"
-                            inputProps={{ 'aria-label': `${participant} ${event.name} result` }}
-                            defaultValue={tournament.eventResults?.[event.name]?.[participant]?.performance}
-                            onChange={(e) => {
-                              setEventResult(e.target.value, participant, event.name);
-                            }}
-                            sx={{
-                              minWidth: 96,
-                              '& .MuiInputBase-input': {
-                                py: 0.75,
-                              },
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell sx={pointsCellSx}>
-                          {tournament.eventResults?.[event.name]?.[participant]?.points}
-                        </TableCell>
-                      </React.Fragment>
-                    ))}
-                    <TableCell sx={pointsCellSx}>{tournament.overall?.[participant]?.points}</TableCell>
-                    <TableCell sx={{ color: 'primary.dark', fontWeight: 900, textAlign: 'center' }}>
-                      {tournament.overall?.[participant]?.place}
+                <TableRow>
+                  {events.map((event) => (
+                    <React.Fragment key={event.name}>
+                      <TableCell sx={subHeaderSx}>Ergebnis</TableCell>
+                      <TableCell sx={subHeaderSx}>Punkte</TableCell>
+                    </React.Fragment>
+                  ))}
+                  <TableCell sx={subHeaderSx}>Punkte</TableCell>
+                  <TableCell sx={{ ...subHeaderSx, borderRight: 0 }}>Platz</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tournament.participants.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={events.length * 2 + 3}
+                      sx={{ color: 'text.secondary', py: 4, textAlign: 'center' }}
+                    >
+                      Noch keine Teilnehmer vorhanden.
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                ) : (
+                  sortedParticipants.map((participant) => (
+                    <TableRow key={participant} hover>
+                      <TableCell sx={{ borderRight: '1px solid', borderColor: 'divider', fontWeight: 800 }}>
+                        {participant}
+                      </TableCell>
+                      {events.map((event) => (
+                        <React.Fragment key={event.name}>
+                          <TableCell sx={resultCellSx}>
+                            <TextField
+                              key={`${participant}-${event.name}`}
+                              variant="outlined"
+                              size="small"
+                              inputProps={{ 'aria-label': `${participant} ${event.name} result` }}
+                              defaultValue={tournament.eventResults?.[event.name]?.[participant]?.performance}
+                              onChange={(e) => {
+                                setEventResult(e.target.value, participant, event.name);
+                              }}
+                              sx={{
+                                minWidth: 96,
+                                '& .MuiInputBase-input': {
+                                  py: 0.75,
+                                },
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell sx={pointsCellSx}>
+                            {tournament.eventResults?.[event.name]?.[participant]?.points}
+                          </TableCell>
+                        </React.Fragment>
+                      ))}
+                      <TableCell sx={pointsCellSx}>{tournament.overall?.[participant]?.points}</TableCell>
+                      <TableCell sx={{ color: 'primary.dark', fontWeight: 900, textAlign: 'center' }}>
+                        {tournament.overall?.[participant]?.place}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
 
         <Stack spacing={2}>
           <Paper variant="outlined" sx={{ p: 2 }}>

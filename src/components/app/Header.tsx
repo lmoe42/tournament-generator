@@ -48,7 +48,7 @@ const Header: React.FC = () => {
             Tournament Generator
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-            Strongman workspace
+            Local workspace
           </Typography>
         </Box>
         <Box sx={{ flexGrow: 1 }} />

@@ -19,30 +19,20 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import React, { useState } from 'react';
-import { Tournament } from 'types';
+import { TournamentSummary } from 'types';
 import { useNavigate } from 'react-router-dom';
 
 interface TournamentOverviewProps {
-  tournament: Tournament;
+  summary: TournamentSummary;
   onDelete: (name: string) => void;
 }
 
-const getCompletedResultsCount = (tournament: Tournament): number => {
-  return Object.values(tournament.eventResults ?? {}).reduce((sum, result) => sum + Object.keys(result).length, 0);
-};
-
-const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onDelete }) => {
+const TournamentOverview: React.FC<TournamentOverviewProps> = ({ summary, onDelete }) => {
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const eventsCount = tournament.events?.length ?? 0;
-  const participantsCount = tournament.participants.length;
-  const expectedResultsCount = eventsCount * participantsCount;
-  const completedResultsCount = getCompletedResultsCount(tournament);
-  const progress = expectedResultsCount > 0 ? Math.round((completedResultsCount / expectedResultsCount) * 100) : 0;
-
   const handleCardClick = () => {
-    navigate(`/tournament/${encodeURIComponent(tournament.name)}`);
+    navigate(`/tournament/${encodeURIComponent(summary.name)}`);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -51,7 +41,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onD
   };
 
   const handleConfirmDelete = () => {
-    onDelete(tournament.name);
+    onDelete(summary.name);
     setDeleteDialogOpen(false);
   };
 
@@ -69,9 +59,9 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onD
           <CardContent sx={{ display: 'grid', gap: 1.5, pb: 1.5 }}>
             <Stack direction="row" justifyContent="space-between" spacing={1}>
               <Typography variant="h6" component="div">
-                {tournament.name}
+                {summary.name}
               </Typography>
-              <Chip label={tournament.type} size="small" color="secondary" variant="outlined" />
+              <Chip label={summary.type} size="small" color="secondary" variant="outlined" />
             </Stack>
 
             <Stack direction="row" spacing={2}>
@@ -84,7 +74,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onD
                   Teilnehmer
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 800 }}>
-                  {participantsCount}
+                  {summary.participantsCount}
                 </Typography>
               </Box>
               <Box>
@@ -93,10 +83,10 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onD
                   color="text.secondary"
                   sx={{ fontWeight: 800, textTransform: 'uppercase' }}
                 >
-                  Events
+                  {summary.primaryCount.label}
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 800 }}>
-                  {eventsCount}
+                  {summary.primaryCount.value}
                 </Typography>
               </Box>
               <Box>
@@ -108,7 +98,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onD
                   Felder
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 800 }}>
-                  {completedResultsCount}/{expectedResultsCount}
+                  {summary.completedFields}/{summary.totalFields}
                 </Typography>
               </Box>
             </Stack>
@@ -119,13 +109,13 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onD
                   Fortschritt
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {progress}%
+                  {summary.progress}%
                 </Typography>
               </Stack>
               <LinearProgress
-                aria-label={`${tournament.name} progress`}
+                aria-label={`${summary.name} progress`}
                 variant="determinate"
-                value={progress}
+                value={summary.progress}
                 sx={{
                   bgcolor: '#edf0ed',
                   borderRadius: 999,
@@ -150,7 +140,7 @@ const TournamentOverview: React.FC<TournamentOverviewProps> = ({ tournament, onD
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Turnier loeschen</DialogTitle>
         <DialogContent>
-          <DialogContentText>Soll das Turnier "{tournament.name}" wirklich geloescht werden?</DialogContentText>
+          <DialogContentText>Soll das Turnier {summary.name} wirklich geloescht werden?</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Abbrechen</Button>

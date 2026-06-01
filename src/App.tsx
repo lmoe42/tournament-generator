@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import AppRoutes from 'Routes';
 import { BrowserRouter } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Header from 'components/Header';
+import Header from 'components/app/Header';
 import React from 'react';
 
 const theme = createTheme({

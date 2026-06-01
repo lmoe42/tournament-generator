@@ -1,4 +1,4 @@
-import { calculatePoints, getEventResult } from 'logic/resultCalculation';
+import { calculatePoints, getEventResult } from 'logic/strongman/resultCalculation';
 import { EventResults, StrongmanEventTypes, Tournament, TournamentTypes } from 'types';
 import { describe, expect, it } from 'vitest';
 

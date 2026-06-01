@@ -2,37 +2,25 @@ import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Grid2 as Grid, Paper, Stack, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
-import TournamentCreationModal from 'components/TournamentCreationModal';
-import TournamentOverview from 'components/TournamentOverview';
-import { Tournament } from 'types';
+import TournamentCreationModal from 'components/tournaments/TournamentCreationModal';
+import TournamentOverview from 'components/tournaments/TournamentOverview';
 import { deleteTournament, getExistingTournaments } from 'logic/persistence';
-
-const getCompletedResultsCount = (tournament: Tournament): number => {
-  return Object.values(tournament.eventResults ?? {}).reduce((sum, result) => sum + Object.keys(result).length, 0);
-};
-
-const getExpectedResultsCount = (tournament: Tournament): number => {
-  return tournament.participants.length * (tournament.events?.length ?? 0);
-};
+import { Tournament } from 'types';
+import { getTournamentSummary } from 'logic/tournamentSummary';
 
 const ExistingTournaments: React.FC = () => {
   const [existingTournaments, setExistingTournaments] = useState<Tournament[]>(() => getExistingTournaments());
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  const participantsCount = existingTournaments.reduce((sum, tournament) => sum + tournament.participants.length, 0);
-  const expectedResultsCount = existingTournaments.reduce(
-    (sum, tournament) => sum + getExpectedResultsCount(tournament),
+  const tournamentSummaries = existingTournaments.map(getTournamentSummary);
+  const participantsCount = tournamentSummaries.reduce((sum, summary) => sum + summary.participantsCount, 0);
+  const openResultsCount = tournamentSummaries.reduce(
+    (sum, summary) => sum + Math.max(summary.totalFields - summary.completedFields, 0),
     0,
   );
-  const completedResultsCount = existingTournaments.reduce(
-    (sum, tournament) => sum + getCompletedResultsCount(tournament),
-    0,
-  );
-  const openResultsCount = Math.max(expectedResultsCount - completedResultsCount, 0);
-  const completedTournamentsCount = existingTournaments.filter((tournament) => {
-    const expected = getExpectedResultsCount(tournament);
-    return expected > 0 && getCompletedResultsCount(tournament) >= expected;
-  }).length;
+  const completedTournamentsCount = tournamentSummaries.filter(
+    (summary) => summary.totalFields > 0 && summary.completedFields >= summary.totalFields,
+  ).length;
 
   const handleDeleteTournament = (name: string) => {
     deleteTournament(name);
@@ -44,7 +32,7 @@ const ExistingTournaments: React.FC = () => {
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2} sx={{ mb: 2.5 }}>
         <Box>
           <Typography variant="overline" color="primary" sx={{ fontWeight: 800 }}>
-            Strongman Workspace
+            Local Workspace
           </Typography>
           <Typography variant="h4">Turnieruebersicht</Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>
@@ -104,18 +92,16 @@ const ExistingTournaments: React.FC = () => {
           }}
         >
           <Typography variant="h6">Noch keine Turniere vorhanden.</Typography>
-          <Typography color="text.secondary">
-            Erstelle ein Strongman-Turnier, um Teilnehmer und Events zu verwalten.
-          </Typography>
+          <Typography color="text.secondary">Erstelle ein Turnier, um Teilnehmer und Events zu verwalten.</Typography>
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateModalOpen(true)}>
             Neues Turnier
           </Button>
         </Paper>
       ) : (
         <Grid container spacing={2}>
-          {existingTournaments.map((tournament) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={tournament.name}>
-              <TournamentOverview tournament={tournament} onDelete={handleDeleteTournament} />
+          {tournamentSummaries.map((summary) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={summary.name}>
+              <TournamentOverview summary={summary} onDelete={handleDeleteTournament} />
             </Grid>
           ))}
         </Grid>

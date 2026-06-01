@@ -3,7 +3,7 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { Box, Button, Paper, Stack, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
-import TournamentCreationModal from 'components/TournamentCreationModal';
+import TournamentCreationModal from 'components/tournaments/TournamentCreationModal';
 import TrophySvg from 'assets/trophy.svg';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,13 +36,13 @@ const LandingPage: React.FC = () => {
         <Stack spacing={2.5} justifyContent="center">
           <Box>
             <Typography variant="overline" color="primary" sx={{ fontWeight: 800 }}>
-              Strongman Workspace
+              Local Workspace
             </Typography>
             <Typography variant="h4" sx={{ mt: 0.5 }}>
               Tournament Generator
             </Typography>
             <Typography color="text.secondary" sx={{ maxWidth: 620, mt: 1 }}>
-              Verwalte Strongman-Turniere, Teilnehmer, Events und Ergebnistabellen lokal im Browser.
+              Verwalte Turniere, Teilnehmer, Events und Ergebnistabellen lokal im Browser.
             </Typography>
           </Box>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>

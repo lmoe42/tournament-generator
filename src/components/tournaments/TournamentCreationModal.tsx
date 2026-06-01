@@ -49,7 +49,7 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({ open,
       name,
       participants: [],
       events: [],
-      type: selectedType,
+      type: TournamentTypes.STRONGMAN,
     };
 
     const result = createTournament(newTournament);

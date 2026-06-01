@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import StrongmanTournamentComponent from 'components/TournamentStrongman';
+import StrongmanTournamentComponent from 'components/strongman/TournamentStrongman';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TournamentTypes } from 'types';
 import { getTournament } from 'logic/persistence';
